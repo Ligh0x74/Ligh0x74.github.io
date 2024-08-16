@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>CSAPP 第 1 &amp; 2 章 - Ligh0x74&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Ligh0x74&#039;s Blog"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ligh0x74&#039;s Blog"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="系统概述 编译系统  系统硬件  系统抽象  信息存储 基本概念 大多数计算机使用 8 位的块，或者字节（byte），作为最小的可寻址的内存单位，而不是访问内存中单独的位。机器级程序将内存视为一个非常大的字节数组，称为虚拟内存（virtual memory）。内存的每个字节都由一个唯一的数字来标识，称为它的地址（address），所有可能地址的集合就称为虚拟地址空间（virtual address"><meta property="og:type" content="blog"><meta property="og:title" content="CSAPP 第 1 &amp; 2 章"><meta property="og:url" content="https://ligh0x74.github.io/2024/08/16/CSAPP%20%E7%AC%AC%201%20&amp;%202%20%E7%AB%A0/"><meta property="og:site_name" content="Ligh0x74&#039;s Blog"><meta property="og:description" content="系统概述 编译系统  系统硬件  系统抽象  信息存储 基本概念 大多数计算机使用 8 位的块，或者字节（byte），作为最小的可寻址的内存单位，而不是访问内存中单独的位。机器级程序将内存视为一个非常大的字节数组，称为虚拟内存（virtual memory）。内存的每个字节都由一个唯一的数字来标识，称为它的地址（address），所有可能地址的集合就称为虚拟地址空间（virtual address"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://ligh0x74.github.io/img/System.assets/1723106784635.png"><meta property="og:image" content="https://ligh0x74.github.io/img/System.assets/1723793936587.png"><meta property="og:image" content="https://ligh0x74.github.io/img/System.assets/1723107838196.png"><meta property="og:image" content="https://ligh0x74.github.io/img/System.assets/1722937251924.png"><meta property="og:image" content="https://ligh0x74.github.io/img/System.assets/1722992357904.png"><meta property="og:image" content="https://ligh0x74.github.io/img/System.assets/1722992781731.png"><meta property="og:image" content="https://ligh0x74.github.io/img/System.assets/1722994306389.png"><meta property="article:published_time" content="2024-08-16T07:50:07.806Z"><meta property="article:modified_time" content="2024-08-16T08:08:36.563Z"><meta property="article:author" content="Ligh0x74"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://ligh0x74.github.io/img/System.assets/1723106784635.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://ligh0x74.github.io/2024/08/16/CSAPP%20%E7%AC%AC%201%20&%202%20%E7%AB%A0/"},"headline":"CSAPP 第 1 & 2 章","image":["https://ligh0x74.github.io/img/System.assets/1723106784635.png","https://ligh0x74.github.io/img/System.assets/1723793936587.png","https://ligh0x74.github.io/img/System.assets/1723107838196.png","https://ligh0x74.github.io/img/System.assets/1722937251924.png","https://ligh0x74.github.io/img/System.assets/1722992357904.png","https://ligh0x74.github.io/img/System.assets/1722992781731.png","https://ligh0x74.github.io/img/System.assets/1722994306389.png"],"datePublished":"2024-08-16T07:50:07.806Z","dateModified":"2024-08-16T08:08:36.563Z","author":{"@type":"Person","name":"Ligh0x74"},"publisher":{"@type":"Organization","name":"Ligh0x74's Blog","logo":{"@type":"ImageObject","url":"https://ligh0x74.github.io/img/logo.svg"}},"description":"系统概述 编译系统  系统硬件  系统抽象  信息存储 基本概念 大多数计算机使用 8 位的块，或者字节（byte），作为最小的可寻址的内存单位，而不是访问内存中单独的位。机器级程序将内存视为一个非常大的字节数组，称为虚拟内存（virtual memory）。内存的每个字节都由一个唯一的数字来标识，称为它的地址（address），所有可能地址的集合就称为虚拟地址空间（virtual address"}</script><link rel="canonical" href="https://ligh0x74.github.io/2024/08/16/CSAPP%20%E7%AC%AC%201%20&amp;%202%20%E7%AB%A0/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-08-16T07:50:07.806Z" title="2024/8/16 下午3:50:07">2024-08-16</time>发表</span><span class="level-item"><time dateTime="2024-08-16T08:08:36.563Z" title="2024/8/16 下午4:08:36">2024-08-16</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E7%B3%BB%E7%BB%9F/">系统</a></span><span class="level-item">14 分钟读完 (大约2103个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">CSAPP 第 1 &amp; 2 章</h1><div class="content"><h2 id="系统概述">系统概述</h2>
+<h3 id="编译系统">编译系统</h3>
+<p><img src="/img/System.assets/1723106784635.png" alt=""></p>
+<h3 id="系统硬件">系统硬件</h3>
+<p><img src="/img/System.assets/1723793936587.png" alt=""></p>
+<h3 id="系统抽象">系统抽象</h3>
+<p><img src="/img/System.assets/1723107838196.png" alt=""></p>
+<h2 id="信息存储">信息存储</h2>
+<h3 id="基本概念">基本概念</h3>
+<p>大多数计算机使用 8 位的块，或者<strong>字节</strong>（byte），作为最小的可寻址的内存单位，而不是访问内存中单独的位。机器级程序将内存视为一个非常大的字节数组，称为<strong>虚拟内存</strong>（virtual memory）。内存的每个字节都由一个唯一的数字来标识，称为它的<strong>地址</strong>（address），所有可能地址的集合就称为<strong>虚拟地址空间</strong>（virtual address space）。</p>
+<p>每台计算机都有一个<strong>字长</strong>（word size），指明指针数据的<strong>标称大小</strong>（nominal size）。因为虚拟地址是以这样的一个字来编码的，所以字长决定的最重要的系统参数就是虚拟地址空间的最大大小。也就是说，对于一个字长为 \(w\) 位的机器而言，虚拟地址的范围为 0 ~ \(2^{w}\)-1，程序最多访问 \(2^{w}\) 个字节。</p>
+<p>我们将程序称为“32 位程序”或“64 位程序”时，区别在于该程序是如何编译的，而不是其运行的机器类型。</p>
+<h3 id="字节顺序">字节顺序</h3>
+<p>对于跨越多字节的程序对象，我们必须建立两个规则：这个对象的地址是什么，以及在内存中如何排列这些字节。</p>
+<p>在几乎所有的机器上，多字节对象都被存储为连续的字节序列，对象的地址为所使用字节中最小的地址。例如，假设一个类型为 int 的变量 × 的地址为 0x100，也就是说，地址表达式 &amp;× 的值为 0x100。那么，（假设数据类型 int 为 32 位表示）x 的 4 个字节将被存储在内存的 0x100、0x101、0x102 和 0x103 位置。</p>
+<p>在内存中按照从最低有效字节到最高有效字节的顺序存储对象的方式，称为<strong>小端法</strong>（little endian）。按照从最高有效字节到最低有效字节的顺序存储对象的方式，称为<strong>大端法</strong>（big endian）。假设变量 x 的类型为 int，位于地址 0x100 处，它的十六进制值为 0x01234567。地址范围 0x100 ~ 0x103 的字节顺序依赖于机器的类型：</p>
+<p><img src="/img/System.assets/1722937251924.png" alt=""></p>
+<h2 id="整数表示">整数表示</h2>
+<h3 id="编码方式">编码方式</h3>
+<p>对向量 \(\vec{x}=[x_{w-1},x_{w-2},\cdots,x_{0}]\)，各编码方式的定义如下：</p>
+<table>
+<thead>
+<tr>
+<th>编码方式</th>
+<th>定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无符号数</td>
+<td>\(B2U_{w}(\vec{x})\dot =\sum_{i=0}^{w-1}x_{i}2^{i}\)</td>
+</tr>
+<tr>
+<td>补码</td>
+<td>\(B2T_{w}(\vec{x})\dot =-x_{w-1}2^{w-1}+\sum_{i=0}^{w-2}x_{i}2^{i}\)</td>
+</tr>
+<tr>
+<td>反码</td>
+<td>\(B2O_{w}(\vec{x})\dot =-x_{w-1}(2^{w-1}-1)+\sum_{i=0}^{w-2}x_{i}2^{i}\)</td>
+</tr>
+<tr>
+<td>原码</td>
+<td>\(B2S_{w}(\vec{x})\dot =(-1)^{x_{w-1}}\cdot(\sum_{i=0}^{w-2}x_{i}2^{i})\)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="转换规则">转换规则</h3>
+<p>对于大多数C语言的实现，处理同样字长的有符号数和无符号数之间相互转换的一般规则是：数值可能会改变，但是位模式不变。转换关系如下：</p>
+<ul>
+<li>补码转换为无符号数，\(T2U_{w}(x)=x+x_{w-1}2^{w}\)。</li>
+<li>无符号数转换为补码，\(U2T_{w}(u)=u-u_{w-1}2^{w}\)。</li>
+</ul>
+<p>当执行一个运算时，如果它的一个运算数是有符号的而另一个是无符号的，那么 C 语言会隐式地将有符号参数强制类型转换为无符号数，并假设这两个数都是非负的，来执行这个运算。</p>
+<h3 id="扩展规则">扩展规则</h3>
+<p>要将一个无符号数转换为一个更大的数据类型，我们只要简单地在表示的开头添加 0，这种运算被称为零扩展（zero extension）。要将一个补码数字转换为一个更大的数据类型，可以执行一个符号扩展（sign extension），在表示中添加最高有效位的值。对于扩展大小和转换符号的顺序，C 语言标准要求，先扩展大小，再转换符号。</p>
+<h3 id="运算规则">运算规则</h3>
+<ul>
+<li>检测无符号数加法中的溢出：对满足 \(0\leq x,y\leq UMax_{w}\) 的 \(x\) 和 \(y\)，令 \(s\dot=x+_{w}^{u}y\)。当且仅当 \(s&lt;x\)（或者等价地 \(s&lt;y\)）时，计算 \(s\) 发生溢出。</li>
+<li>检测补码数字加法中的溢出：对满足 \(TMin_{w}\leq x,y\leq TMax_{w}\) 的 \(x\) 和 \(y\)，令 \(s\dot=x+_{w}^{t}y\)。当且仅当 \(x&gt;0\)，\(y&gt;0\)，但 \(s\leq 0\) 时，计算 \(s\) 发生正溢出。当且仅当 \(x&lt;0\)，\(y&lt;0\)，但 \(s\geq 0\) 时，计算 \(s\) 发生负溢出。</li>
+</ul>
+<p>计算一个位级表示的值的在补码加法下的逆元：第一种方法是对每一位取反，再对结果加 1，即 <code>-x == ~x + 1</code>；第二种方法是将最低位的 1 左侧的所有位取反。</p>
+<p>无符号乘法和补码乘法在截断之后的位级表示是相同的，该结论可以通过公式推导得出。</p>
+<p>整数乘法运算指令比其他整数运算（例如加法、减法、移位）更慢，因此编译器会尝试使用移位和加减法的组合来代替乘以常数因子的乘法。是否实际替换，取决于两种方案的相对速度。</p>
+<p>整数除法总是向零取整，即对于正数向下取整，对于负数向上取整。当使用移位运算替换除以 2 的幂的除法时，需要注意补码移位是向下取整。也就是说，对于负数需要添加“偏置（biasing）”值，从而使得其向零取整。如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x / (<span class="number">1</span> &lt;&lt; k) == (x &lt; <span class="number">0</span> ? x + (<span class="number">1</span> &lt;&lt; k) - <span class="number">1</span> : x) &gt;&gt; k</span><br></pre></td></tr></table></figure>
+<h2 id="浮点标准">浮点标准</h2>
+<p>IEEE 浮点标准用 \(V=(-1)^{s}\times M\times 2^{E}\) 的形式来表示一个数：</p>
+<ul>
+<li>
+<p>符号（sign） \(s\) 决定这数是负数（\(s=1\)）还是正数（\(s=0\)），而对于数值 0 的符号位解释作为特殊情况处理。</p>
+</li>
+<li>
+<p>尾数（significand） \(M\) 是一个二进制小数，它的范围是1 ~ \(2-\varepsilon\)，或者是 0 ~ \(1-\varepsilon\)。</p>
+</li>
+<li>
+<p>阶码（exponent） \(E\) 的作用是对浮点数加权，这个权重是 2 的 \(E\) 次幂（可能是负数）。</p>
+</li>
+</ul>
+<p>将浮点数的位表示划分为三个字段，分别对这些值进行编码：</p>
+<ul>
+<li>一个单独的符号位 \(s\) 直接编码符号 \(s\)。</li>
+<li>\(k\) 位的阶码字段 \(exp=e_{k-1}\cdots e_{1}e_{0}\) 编码阶码 \(E\)。</li>
+<li>\(n\) 位小数字段 \(frac=f_{n-1}\cdots f_{1}f_{0}\)，编码尾数 \(M\)，但是编码出来的值也依赖于阶码字段的值是否等于 0。</li>
+</ul>
+<p>图 2-32 给出了将这三个字段装进字中两种最常见的格式。在单精度浮点格式中，s、exp 和 frac 字段分别为 1 位、k = 8 位和 n = 23 位，得到一个 32 位的表示。在双精度浮点格式中，s、exp 和 frac 字段分别为 1 位、k = 11 位和 n = 52 位，得到一个 64 位的表示。</p>
+<p><img src="/img/System.assets/1722992357904.png" alt=""></p>
+<p>给定位表示，根据 exp 的值，被编码的值可以分成三种不同的情况。</p>
+<p><img src="/img/System.assets/1722992781731.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>阶码</th>
+<th>尾数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>规格化的值</td>
+<td>\(E=e-Bias\)，\(Bias=2^{k-1}-1\)</td>
+<td>\(M=1+f\)</td>
+</tr>
+<tr>
+<td>非规格化的值</td>
+<td>\(E=1-Bias\)</td>
+<td>\(M=f\)</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/img/System.assets/1722994306389.png" alt=""></p>
+<p>这种表示具有一个有趣的属性，假如我们将图 2-35 中的值的位表达式解释为无符号整数，它们就是按升序排列的，就像它们表示的浮点数一样。IEEE 格式如此设计就是为了浮点数能够使用整数排序函数来进行排序。当处理负数时，有一个小的难点，因为它们有开头的 1，并且它们是按照降序出现的，但是不需要浮点运算来进行比较也能解决这个问题。</p>
+<p>IEEE 浮点格式定义了四种不同的舍入方式：向偶数舍入（默认），向零舍入，向下舍入，向上舍入。向偶数舍入指的是，将正中间的值向偶数舍入。IEEE 标准中的浮点加法和乘法是可交换的，具有单调性，但是不可结合，不具有分配性。</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>CSAPP 第 1 &amp; 2 章</p><p><a href="https://ligh0x74.github.io/2024/08/16/CSAPP 第 1 &amp; 2 章/">https://ligh0x74.github.io/2024/08/16/CSAPP 第 1 &amp; 2 章/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Ligh0x74</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2024-08-16</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2024-08-16</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a><a class="icons" rel="noopener" target="_blank" title="ShareAlike" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-sa"></i></a></p></div></div></div></div></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2024/08/16/CSAPP%20%E7%AC%AC%208%20&amp;%209%20%E7%AB%A0%20+%20OSTEP%20%E8%99%9A%E6%8B%9F%E5%8C%96/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">CSAPP 第 8 &amp; 9 章 + OSTEP 虚拟化</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2024/08/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><span class="level-item">设计模式</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="waline-thread"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.css"><script src="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.js"></script><script>Waline.init({
+            el: '#waline-thread',
+            serverURL: "https://blog-waline-ligh0x74.vercel.app",
+            path: window.location.pathname,
+            lang: "zh-CN",
+            locale: {"placeholder":"Comment here..."},
+            emoji: ["//unpkg.com/@waline/emojis@1.0.1/weibo"],
+            dark: "auto",
+            meta: ["nick","mail","link"],
+            requiredMeta: [],
+            login: "enable",
+            
+            pageSize: 10,
+            imageUploader: false,
+            
+            texRenderer: false,
+            search: false,
+            pageview: false,
+            comment: false,
+            copyright: true,
+        });</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1 is-sticky"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/dark_souls.jpg" alt="Ligh0x74"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">Ligh0x74</p><p class="is-size-6 is-block">Developer</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Earth, Solar System</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">126</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">20</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">8</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/Ligh0x74" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Ligh0x74"><i class="fab fa-github"></i></a></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/"><span class="level-start"><span class="level-item">书籍</span></span><span class="level-end"><span class="level-item tag">3</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/DDIA/"><span class="level-start"><span class="level-item">DDIA</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">基础</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E6%A8%A1%E6%9D%BF/"><span class="level-start"><span class="level-item">模板</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/OceanBase/"><span class="level-start"><span class="level-item">OceanBase</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/"><span class="level-start"><span class="level-item">算法</span></span><span class="level-end"><span class="level-item tag">88</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/AtCoder/"><span class="level-start"><span class="level-item">AtCoder</span></span><span class="level-end"><span class="level-item tag">16</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/Codeforces/"><span class="level-start"><span class="level-item">Codeforces</span></span><span class="level-end"><span class="level-item tag">34</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/LeetCode/"><span class="level-start"><span class="level-item">LeetCode</span></span><span class="level-end"><span class="level-item tag">38</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%B3%BB%E7%BB%9F/"><span class="level-start"><span class="level-item">系统</span></span><span class="level-end"><span class="level-item tag">5</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><span class="level-start"><span class="level-item">设计模式</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">4</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/C/"><span class="level-start"><span class="level-item">C++</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Java/"><span class="level-start"><span class="level-item">Java</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Python/"><span class="level-start"><span class="level-item">Python</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/"><span class="level-start"><span class="level-item">课程</span></span><span class="level-end"><span class="level-item tag">15</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/"><span class="level-start"><span class="level-item">CMU 15-445</span></span><span class="level-end"><span class="level-item tag">7</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/"><span class="level-start"><span class="level-item">MIT 6.824</span></span><span class="level-end"><span class="level-item tag">8</span></span></a></li></ul></li></ul></div></div></div><div class="column-right-shadow is-hidden-widescreen is-sticky"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#系统概述"><span class="level-left"><span class="level-item">1</span><span class="level-item">系统概述</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#编译系统"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">编译系统</span></span></a></li><li><a class="level is-mobile" href="#系统硬件"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">系统硬件</span></span></a></li><li><a class="level is-mobile" href="#系统抽象"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">系统抽象</span></span></a></li></ul></li><li><a class="level is-mobile" href="#信息存储"><span class="level-left"><span class="level-item">2</span><span class="level-item">信息存储</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#基本概念"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">基本概念</span></span></a></li><li><a class="level is-mobile" href="#字节顺序"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">字节顺序</span></span></a></li></ul></li><li><a class="level is-mobile" href="#整数表示"><span class="level-left"><span class="level-item">3</span><span class="level-item">整数表示</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#编码方式"><span class="level-left"><span class="level-item">3.1</span><span class="level-item">编码方式</span></span></a></li><li><a class="level is-mobile" href="#转换规则"><span class="level-left"><span class="level-item">3.2</span><span class="level-item">转换规则</span></span></a></li><li><a class="level is-mobile" href="#扩展规则"><span class="level-left"><span class="level-item">3.3</span><span class="level-item">扩展规则</span></span></a></li><li><a class="level is-mobile" href="#运算规则"><span class="level-left"><span class="level-item">3.4</span><span class="level-item">运算规则</span></span></a></li></ul></li><li><a class="level is-mobile" href="#浮点标准"><span class="level-left"><span class="level-item">4</span><span class="level-item">浮点标准</span></span></a></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2024 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/mhchem.min.js" defer></script><script>window.addEventListener("load", function() {
+            document.querySelectorAll('[role="article"] > .content').forEach(function(element) {
+                renderMathInElement(element);
+            });
+        });</script><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
