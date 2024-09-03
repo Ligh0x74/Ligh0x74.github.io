@@ -29,130 +29,365 @@
       switchTab();
       window.addEventListener('hashchange', switchTab, false);
   })();
-  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/links">Links</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><div class="card-content"><nav class="breadcrumb" aria-label="breadcrumbs"><ul><li><a href="/categories">分类</a></li><li class="is-active"><a href="#" aria-current="page">课程</a></li></ul></nav></div></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-02-05T00:49:58.762Z" title="2024/2/5 上午8:49:58">2024-02-05</time>发表</span><span class="level-item"><time dateTime="2024-02-05T00:52:11.655Z" title="2024/2/5 上午8:52:11">2024-02-05</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a><span> / </span><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></span><span class="level-item">26 分钟读完 (大约3869个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2024/02/05/ZooKeeper%20Wait-free%20coordination%20for%20Internet-scale%20systems/">ZooKeeper: Wait-free coordination for Internet-scale systems</a></p><div class="content"><p>阅读论文 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/zookeeper.pdf">ZooKeeper</a>，参考 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/zookeeper-faq.txt">FAQ</a>，<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/l-zookeeper.txt">note</a>，<a target="_blank" rel="noopener" href="https://zookeeper.apache.org/doc/current/index.html">官方文档</a>，另一个课程的 <a target="_blank" rel="noopener" href="http://www.scs.stanford.edu/20sp-cs244b/notes/zookeeper.txt">note</a>。</p>
-<h2 id="概述">概述</h2>
-<p>ZooKeeper 是一个协调服务，用于协调分布式应用程序。它没有实现特定的协调原语（例如：配置、选举、锁），而是提供 API 供应用程序开发者使用，让开发者根据实际需要实现协调原语。ZooKeeper API 具有无等待特性，提供事件驱动机制。ZooKeeper 使用流水线（pipeline）架构处理请求，流水线自动支持客户端请求的 FIFO 执行顺序，从而允许客户端异步发送请求。ZooKeeper 没有实现可线性化一致性模型，它仅保证写操作的异步可线性化，以及读操作的写后读和单调读一致性（术语取自 DDIA），适合读多写少的工作负载。</p>
-<h2 id="会话">会话</h2>
-<p>客户端在连接到服务器时建立一个会话（session），同时获得一个会话 ID。只要会话 ID 有效，应用程序就可以通过客户端调用 ZooKeeper API。客户端会定期向服务器发送心跳，如果服务器在超时时间内没有收到心跳，则服务器会结束会话。如果客户端当前连接的服务器故障，则客户端在会话 ID 过期之前自动尝试连接到另一台服务器。</p>
-<p><img src="/img/MIT_6.824.assets/1706791513708.png" alt=""></p>
-<p>PS：创建会话类似写操作，需要经过多数服务器同意，会话的状态也会使用日志持久化，它是一个全局会话。这也可以解释，为什么客户端可以使用同一个会话 ID 透明地切换到另一台服务器。由于开销较大，ZooKeeper 在之后的版本添加了本地会话功能，本地会话只能执行全局会话操作的子集，状态只在本地服务器维护。</p>
-<h2 id="数据模型和监视">数据模型和监视</h2>
-<p>ZooKeeper 以类似文件系统的树形结构在内存中存储协调数据（应用程序元数据），树中的数据节点被称为 znode，由路径名唯一标识。不同的应用程序在各自的子树中组织数据，存储在节点中的数据以原子的方式被读写。节点会维护一个统计结构，包含版本号、时间戳和事务 ID（zxid）等元数据。节点分为常规（Regular）和临时（Ephemeral）两种类型，客户端可以显示创建和删除节点。特别的，临时节点如果没有被显示删除，则在创建它们的会话终止时被自动删除，以及临时节点不能有子节点。</p>
-<p><img src="/img/MIT_6.824.assets/1706793448885.png" alt=""></p>
-<p>创建节点时，客户端可以设置顺序（sequential）标志，从而将一个计数值附加到该节点的路径末尾，同一父节点的子节点的计数值根据创建顺序单调递增。客户端可以为节点设置一次性监视（watch）标志，该标志在客户端连接的服务器本地维护。当监视触发时，服务器会向客户端发送一个监视事件，同时取消监视。有两种监视类型，监视数据和监视子节点。有四种监视事件，创建、删除、数据变化、子节点变化（不包含子节点的数据变化）。监视和会话相关，当会话结束时，监视也会被取消。ZooKeeper 保证设置监视的客户端在看到变化之前，会收到服务器的通知。会话事件也会触发监视，以便客户端知道监视事件可能延迟。</p>
-<h2 id="原语示例">原语示例</h2>
-<p>客户端可以使用 ZooKeeper API 实现更强的原语，示例如下。更多示例（双重屏障、2PC、选举）可以查看<a target="_blank" rel="noopener" href="https://zookeeper.apache.org/doc/r3.9.1/recipes.html">官方文档</a>。</p>
-<h3 id="配置管理">配置管理</h3>
-<p>ZooKeeper 可用于分布式应用程序的配置管理，可以将配置存储在 znode 中。客户端从 znode 读取配置，同时设置监视标志。如果配置被更新，则客户端会收到通知，然后再次从该 znode 读取配置和设置监视标志。</p>
-<h3 id="群组成员">群组成员</h3>
-<p>客户端可以创建一个 znode 表示一个群组，当进程以该群组的成员身份启动时，它会在该 znode 下创建一个临时子 znode。如果每个进程有一个唯一的名称，则将该标识作为子 znode 的名称，否则可以使用顺序标志，使其获得唯一的名称。进程可以将其元数据存储在该子 znode 中，例如地址和端口。如果进程终止，则临时节点会被自动删除。可以通过在 znode 上设置监视标志，从而监视群组成员的变化。</p>
-<h3 id="简单锁">简单锁</h3>
-<p>可以将一个指定路径的 znode 作为锁，客户端可以创建临时 znode 来获取锁，其他客户端通过判断 znode 是否存在来判断是否能够获取锁，同时设置监视标志。当临时 znode 被显示或自动删除，则表示锁被释放。此时，等待锁的客户端将收到通知。但是该实现存在羊群效应（herd effect）：在锁被释放时，许多客户端会争抢同一个锁。</p>
-<h3 id="无羊群效应的简单锁">无羊群效应的简单锁</h3>
-<p>直觉上来说，将获取锁的请求按照 FIFO 的顺序排队处理，那么就可以避免羊群效应。可以使用顺序标志在指定父 znode 下创建临时子 znode，客户端通过判断其创建的临时 znode 是否是序号最小的，来判断它是否已获取锁。当客户端需要释放锁时，只需删除其创建的临时 znode。个人认为，有无羊群效应的简单锁，有点像是 <code>notify_all</code> 和 <code>notify_one</code> 的区别。</p>
-<p><img src="/img/MIT_6.824.assets/1706926084364.png" alt=""></p>
-<p>特别的，在代码实现时有一个陷阱，ZooKeeper 没有提供监视来通知当前 znode 的序号是否最小。在创建 znode 之后， 我们首先需要获取子 znode 列表，判断当前是否是最小的。如果不是，则可以在前一个节点上设置监视。但是，该监视触发并不意味着当前客户端已获取锁，因为有可能只是前一个客户端提前结束会话，此时仍存在更小的序号。</p>
-<h3 id="读写锁">读写锁</h3>
-<p><img src="/img/MIT_6.824.assets/1706928532308.png" alt=""></p>
-<h2 id="实现细节">实现细节</h2>
-<p>ZooKeeper 使用复制提供容错，使用原子广播协议（ZAB）保证多个副本之间的一致性。客户端仅连接到一个服务器发送请求，写请求会被转发给领导者，读请求读取本地数据库而不需要通过领导者。本地处理读请求使得读取性能可以随着服务器的数量增加而增加，而不会受限于单个领导者。复制数据库是一个内存数据库，当日志持久化到磁盘时，才会将日志应用到内存数据库，同时会定期为数据库生成快照。PS：类似 Raft，内存数据库实际上就是一个状态机。</p>
-<p><img src="/img/MIT_6.824.assets/1706932348740.png" alt=""></p>
-<p>ZooKeeper 使用 ZAB 保证写操作的可线性化，同时保证异步请求按照客户端 FIFO 的顺序执行，从而实现写操作的异步可线性化（A-linearizability）。当领导者收到写请求时，如果请求包含的版本号和目标 znode 的未来版本号匹配，就会将请求转换为事务。之所以要和未来版本号匹配，是因为可能存在尚未应用到数据库的事务。如果事务未提交（复制到大多数），则无法应用到数据库。ZooKeeper 保证事务是幂等的，〈transactionType, path, value, new-version〉。</p>
-<p>ZooKeeper 使用的是模糊快照（fuzzy snapshot），因为允许在创建快照的过程中更改状态机，而且也不像 Raft 使用写时复制，所以快照不对应某个时刻的状态，故称为模糊快照。不过，由于事务的幂等性，重放相同的日志也没有关系。从日志的角度看，模糊快照并不对应一个连续的日志范围，可能是断断续续的。</p>
-<p>客户端向服务器发送读写请求和心跳消息，得到的响应中会包含服务器的 zxid。如果客户端连接到新服务器，会检查客户端的 zxid 和新服务器的 zxid，确保新服务器满足客户端的单调读一致性。如果新服务器的视图更旧，客户端可以连接另一台服务器。</p>
-<h2 id="问题">问题</h2>
-<p>Q：无等待（wait-free）是什么意思？</p>
-<p>A：论文 <a target="_blank" rel="noopener" href="https://cs.brown.edu/~mph/Herlihy91/p124-herlihy.pdf">Wait-Free Synchronization</a> 进行了介绍，并发数据对象的无等待实现可以保证，任何进程都能在有限步中完成任何操作，而不论其他进程的执行速度如何。个人认为这个定义有点抽象，无等待还有一个层次结构和共识数。类似的术语还有无锁、无障碍、无阻塞。FAQ 提供了一个简单的解释，为什么 ZooKeeper 是无等待的，因为客户端调用 API 不会被其他客户端阻塞，ZooKeeper 没有使用锁来阻塞调用。</p>
-<p>Q：为何流水线自动支持客户端请求的 FIFO 执行顺序？异步请求为何能提高性能？</p>
-<p>A：我的理解是 TCP 可以保证客户端请求的 FIFO 到达顺序。流水线将一个处理过程分解为多个组件，能够充分利用系统的资源。但流水线依然是一个顺序的处理过程，一般就是按照到达顺序处理的，所以能够自动支持 FIFO 执行顺序。异步请求能提高性能是流水线的特性，如果同步发送请求，流水线中的很多组件会处于空闲状态。</p>
-<p>FAQ 中有问到 ZooKeeper 如何实现异步请求的 FIFO 执行顺序，按照论文的逻辑，这个问题就不对。论文首先说流水线支持 FIFO 执行顺序，然后推出客户端可以发送异步请求。从而我觉得，FAQ 的答案也不对。FAQ 对流水线的解释也有问题，他把流水线解释为批处理。</p>
-<p>Q：如何实现读操作的写后读和单调读一致性？</p>
-<p>A：写后读一致性可以由客户端的 FIFO 执行顺序保证，而单调读一致性通过检查客户端和服务器的 zxid 保证。</p>
-<p>Q：ZooKeeper 如何实现监视（watch）？</p>
-<p>A：FAQ 有解释，客户端通常会注册一个回调函数，该函数在监视触发时调用。Go 使用通道（channel）来实现，当监视触发时，服务器会向通道发送一个事件，然后应用程序可以从通道中获取该事件。但是有个疑问，Go 的通道能跨网络传输数据么。</p>
-<p>Q：为什么请求不幂等，而事务幂等？</p>
-<p>A：假设有一个带顺序标志的创建节点的请求，那么多次发送请求会创建不同的节点。事务是请求的幂等形式，论文中提到形如 〈transactionType, path, value, new-version〉。</p>
-<p>Q：ZooKeeper 服务器、客户端和应用程序的关系？</p>
-<p>A：个人理解，服务器提供低级原语，客户端使用 API 实现更高级的原语，应用程序使用客户端提供的高级原语。</p>
-<p>Q：ZooKeeper 中的 zxid 和版本号有什么关系？</p>
-<p>A：ZooKeeper 的每次状态更改（写操作）都会递增 zxid，而版本号则是 znode 的属性。个人认为，zxid 是 ZAB 层面的，版本号是数据库（状态机）层面的。</p>
-<p>Q：可线性化和可串行化的区别？</p>
-<p>A：可以看下 <a target="_blank" rel="noopener" href="http://www.bailis.org/blog/linearizability-versus-serializability/">Linearizability versus Serializability</a>，很清晰。</p>
-<h2 id="总结">总结</h2>
-<p>刚开始看这篇论文，涉及很多没见过的术语，看着比较折磨。如果深入细节的话，会花费很多时间。我确实一开始没有抓住重点，陷入如何在代码层面使用 ZooKeeper，无等待和通用对象是什么意思之类的。但是，如果从更高的层面来看，ZooKeeper 可以理解为 ZAB + 数据库（状态机），就是使用数据树结构提供一个通用的 API。</p>
-<p>在查找资料的过程中发现很多不一致的地方，例如：<a target="_blank" rel="noopener" href="https://zookeeper.apache.org/doc/r3.9.1/apidocs/zookeeper-server/org/apache/zookeeper/ZooKeeper.html">API 文档</a>中描述异步请求会排队等待发送，但按照论文的描述应该不是这样的，不然怎么提高性能；<a target="_blank" rel="noopener" href="https://zookeeper.apache.org/doc/r3.9.1/zookeeperProgrammers.html#ch_zkGuarantees">一致性保证</a>中提到单一系统映像，定义首先说保证看到相同的视图，然后又说不会看到旧视图，但这完全不是一个意思；FAQ 中对异步请求如何实现客户端 FIFO 执行顺序的讨论，我认为论文和另一份笔记都证明 FAQ 的错误。</p>
-<p>在阅读论文和资料的过程中，经常会看到某个描述，感觉模糊不清，只能凭自己的猜测去理解。实际上确实有很多模糊的地方，没有描述具体的实现方式，但有些问题其实论文中也给出了回答。所以，在读论文的过程中还是要仔细一点，遇到不懂的不要随便猜测，先记下问题，因为很可能是一个错误的猜测，还会干扰之后的理解。总之，论文只是提供一个简要的说明，深入理解还需要实际使用 ZooKeeper，以及阅读源码。</p>
-</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-01-29T14:24:44.457Z" title="2024/1/29 下午10:24:44">2024-01-29</time>发表</span><span class="level-item"><time dateTime="2024-01-31T16:30:27.717Z" title="2024/2/1 上午12:30:27">2024-02-01</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a><span> / </span><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></span><span class="level-item">34 分钟读完 (大约5026个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2024/01/29/In%20Search%20of%20an%20Understandable%20Consensus%20Algorithm%20(Extended%20Version)/">In Search of an Understandable Consensus Algorithm (Extended Version)</a></p><div class="content"><p>阅读论文 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/raft-extended.pdf">Raft</a>，参考 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/raft-faq.txt">FAQ1</a>，<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/l-raft.txt">note1</a>，<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/raft2-faq.txt">FAQ2</a>，<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/l-raft2.txt">note2</a>。</p>
-<h2 id="概述">概述</h2>
-<p>MapReduce 的 master、GFS 的 master 和 VM FT 的共享磁盘都存在单点故障（即使 GFS 的 master 存在副本，其依然是单点故障，因为故障时系统会停止），从而可以很简单的避免脑裂。脑裂会发生的根本原因在于，无法区分机器故障和网络分区故障。共识算法使用多数原则（仲裁协议，quorum），可以在复制的同时避免脑裂。如果集群中有 \(2f+1\) 个服务器，则共识算法可以容忍 \(f\) 个服务器故障。共识算法通常使用状态机复制，以复制日志的方式实现。客户端、服务器以及共识算法和状态机的关系见下图。</p>
-<p><img src="/img/MIT_6.824.assets/1706325532181.png" alt=""></p>
-<p>Raft 的主要设计目标是可理解性，通过分解问题和减少状态来实现。问题被分解为多个子集，例如：领导者选举、日志复制、安全性和成员变更。使用随机化超时时间、限制选举保证日志单向流动等方式，来减少状态。</p>
-<p><img src="/img/MIT_6.824.assets/1706326579904.png" alt=""></p>
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/links">Links</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><div class="card-content"><nav class="breadcrumb" aria-label="breadcrumbs"><ul><li><a href="/categories">分类</a></li><li class="is-active"><a href="#" aria-current="page">课程</a></li></ul></nav></div></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-01-10T13:27:51.992Z" title="2024/1/10 下午9:27:51">2024-01-10</time>发表</span><span class="level-item"><time dateTime="2024-01-10T13:28:28.501Z" title="2024/1/10 下午9:28:28">2024-01-10</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a><span> / </span><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></span><span class="level-item">7 分钟读完 (大约1063个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2024/01/10/Threads%20and%20RPC/">Threads and RPC</a></p><div class="content"><p>参考 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/tour-faq.txt">Go FAQ</a>，<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/crawler.go">crawler.go</a>，<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/kv.go">kv.go</a>，<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/l-rpc.txt">note</a>。</p>
+<h2 id="Exercise-Web-Crawler"><a target="_blank" rel="noopener" href="https://go.dev/tour/concurrency/10">Exercise: Web Crawler</a></h2>
+<h3 id="串行爬虫">串行爬虫</h3>
+<p>就是 DFS。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Serial</span><span class="params">(url <span class="type">string</span>, fetcher Fetcher, fetched <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">bool</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> fetched[url] &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	fetched[url] = <span class="literal">true</span></span><br><span class="line">	urls, err := fetcher.Fetch(url)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, u := <span class="keyword">range</span> urls &#123;</span><br><span class="line">		Serial(u, fetcher, fetched)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="并行爬虫">并行爬虫</h3>
+<h4 id="共享-锁">共享 + 锁</h4>
+<p>在 DFS 的基础上，同时启动多个线程来爬取网页，通过使用锁保护共享变量，使用计数器等待所有线程执行完成。如果网页很多，可能会创建非常多的线程，可以通过使用线程池限制线程的数量。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> fetchState <span class="keyword">struct</span> &#123;</span><br><span class="line">	mu      sync.Mutex</span><br><span class="line">	fetched <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">bool</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(fs *fetchState)</span></span> testAndSet(url <span class="type">string</span>) <span class="type">bool</span> &#123;</span><br><span class="line">	fs.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> fs.mu.Unlock()</span><br><span class="line">	r := fs.fetched[url]</span><br><span class="line">	fs.fetched[url] = <span class="literal">true</span></span><br><span class="line">	<span class="keyword">return</span> r</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ConcurrentMutex</span><span class="params">(url <span class="type">string</span>, fetcher Fetcher, fs *fetchState)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> fs.testAndSet(url) &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	urls, err := fetcher.Fetch(url)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">var</span> done sync.WaitGroup</span><br><span class="line">	<span class="keyword">for</span> _, u := <span class="keyword">range</span> urls &#123;</span><br><span class="line">		done.Add(<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(u <span class="type">string</span>)</span></span> &#123;</span><br><span class="line">			<span class="keyword">defer</span> done.Done()</span><br><span class="line">			ConcurrentMutex(u, fetcher, fs)</span><br><span class="line">		&#125;(u)</span><br><span class="line">	&#125;</span><br><span class="line">	done.Wait()</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">makeState</span><span class="params">()</span></span> *fetchState &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;fetchState&#123;fetched: <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]<span class="type">bool</span>)&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="通道（channel）">通道（channel）</h4>
+<p>使用 channel 实现同步，不需要 DFS，没有任何共享变量，自然也不需要使用锁（尽管 channel 内部会使用锁）。代码的组织方式有点像 MapReduce。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">worker</span><span class="params">(url <span class="type">string</span>, ch <span class="keyword">chan</span> []<span class="type">string</span>, fetcher Fetcher)</span></span> &#123;</span><br><span class="line">	urls, err := fetcher.Fetch(url)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		ch &lt;- []<span class="type">string</span>&#123;&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		ch &lt;- urls</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">coordinator</span><span class="params">(ch <span class="keyword">chan</span> []<span class="type">string</span>, fetcher Fetcher)</span></span> &#123;</span><br><span class="line">	n := <span class="number">1</span></span><br><span class="line">	fetched := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]<span class="type">bool</span>)</span><br><span class="line">	<span class="keyword">for</span> urls := <span class="keyword">range</span> ch &#123;</span><br><span class="line">		<span class="keyword">for</span> _, u := <span class="keyword">range</span> urls &#123;</span><br><span class="line">			<span class="keyword">if</span> fetched[u] == <span class="literal">false</span> &#123;</span><br><span class="line">				fetched[u] = <span class="literal">true</span></span><br><span class="line">				n += <span class="number">1</span></span><br><span class="line">				<span class="keyword">go</span> worker(u, ch, fetcher)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		n -= <span class="number">1</span></span><br><span class="line">		<span class="keyword">if</span> n == <span class="number">0</span> &#123;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ConcurrentChannel</span><span class="params">(url <span class="type">string</span>, fetcher Fetcher)</span></span> &#123;</span><br><span class="line">	ch := <span class="built_in">make</span>(<span class="keyword">chan</span> []<span class="type">string</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		ch &lt;- []<span class="type">string</span>&#123;url&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	coordinator(ch, fetcher)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Go-RPC"><a target="_blank" rel="noopener" href="https://pkg.go.dev/net/rpc">Go RPC</a></h2>
+<p>远程过程调用（Remote procedure call，RPC），指程序调用的过程在远程计算机执行。通常表现为客户端向服务器发送请求，服务器向客户端返回响应。数据在通过网络传输时需要进行序列化和反序列化，序列化是将数据转换为可以存储或传输的格式的过程，反序列化是序列化的逆过程。远程过程调用和本地过程调用的区别在于，如何处理失败的情况。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Client</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">connect</span><span class="params">()</span></span> *rpc.Client &#123;</span><br><span class="line">	client, err := rpc.Dial(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;:1234&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(<span class="string">&quot;dialing:&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> client</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">get</span><span class="params">(key <span class="type">string</span>)</span></span> <span class="type">string</span> &#123;</span><br><span class="line">	client := connect()</span><br><span class="line">	args := GetArgs&#123;<span class="string">&quot;subject&quot;</span>&#125;</span><br><span class="line">	reply := GetReply&#123;&#125;</span><br><span class="line">	err := client.Call(<span class="string">&quot;KV.Get&quot;</span>, &amp;args, &amp;reply)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(<span class="string">&quot;error:&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	client.Close()</span><br><span class="line">	<span class="keyword">return</span> reply.Value</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">put</span><span class="params">(key <span class="type">string</span>, val <span class="type">string</span>)</span></span> &#123;</span><br><span class="line">	client := connect()</span><br><span class="line">	args := PutArgs&#123;<span class="string">&quot;subject&quot;</span>, <span class="string">&quot;6.824&quot;</span>&#125;</span><br><span class="line">	reply := PutReply&#123;&#125;</span><br><span class="line">	err := client.Call(<span class="string">&quot;KV.Put&quot;</span>, &amp;args, &amp;reply)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(<span class="string">&quot;error:&quot;</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	client.Close()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Server</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> KV <span class="keyword">struct</span> &#123;</span><br><span class="line">	mu   sync.Mutex</span><br><span class="line">	data <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">server</span><span class="params">()</span></span> &#123;</span><br><span class="line">	kv := &amp;KV&#123;data: <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span>&#123;&#125;&#125;</span><br><span class="line">	rpcs := rpc.NewServer()</span><br><span class="line">	rpcs.Register(kv)</span><br><span class="line">	l, e := net.Listen(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;:1234&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> e != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(<span class="string">&quot;listen error:&quot;</span>, e)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			conn, err := l.Accept()</span><br><span class="line">			<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">				<span class="keyword">go</span> rpcs.ServeConn(conn)</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		l.Close()</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(kv *KV)</span></span> Get(args *GetArgs, reply *GetReply) <span class="type">error</span> &#123;</span><br><span class="line">	kv.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> kv.mu.Unlock()</span><br><span class="line"></span><br><span class="line">	reply.Value = kv.data[args.Key]</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(kv *KV)</span></span> Put(args *PutArgs, reply *PutReply) <span class="type">error</span> &#123;</span><br><span class="line">	kv.mu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> kv.mu.Unlock()</span><br><span class="line"></span><br><span class="line">	kv.data[args.Key] = args.Value</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="其他问题">其他问题</h2>
+<p>Q：为什么闭包函数可以使用外部函数的变量？</p>
+<p>A：闭包函数引用的外部变量存储在堆中，所以当外部函数返回时，变量依旧存在，垃圾收集器会根据引用计数判断是否回收该变量。注意，如果需要引用循环中的变量，需要通过参数传递（值传递），因为外部变量会随循环变化。</p>
+<p>Q：假设有两个线程，线程 A 使用条件变量等待某个条件，线程 B 在达到条件时通知线程 A。如果线程 B 在解锁之前通知线程 A 会有问题吗？</p>
+<p>A：如果在解锁之前唤醒线程 A，假设线程 A 在 B 解锁之前被调度，那么线程 A 在获取锁时会被阻塞。之后的某个时刻，操作系统会调度线程 B 解锁，此时线程 A 可以重新被调度。注意，条件变量和锁的阻塞队列是独立的，所以不需要再次通知线程 A。</p>
+</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-01-06T07:46:12.101Z" title="2024/1/6 下午3:46:12">2024-01-06</time>发表</span><span class="level-item"><time dateTime="2024-01-31T04:14:52.349Z" title="2024/1/31 下午12:14:52">2024-01-31</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a><span> / </span><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></span><span class="level-item">14 分钟读完 (大约2106个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2024/01/06/MapReduce%20Simplified%20Data%20Processing%20on%20Large%20Clusters/">MapReduce: Simplified Data Processing on Large Clusters</a></p><div class="content"><p>阅读论文 <a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/papers/mapreduce.pdf">MapReduce</a>，做个总结，部分内容参考课程的<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.824/notes/l01.txt">笔记</a>。</p>
+<h2 id="概念">概念</h2>
+<p>MapReduce 是一个编程模型，用于处理和生成大型数据集。它将并行、容错、数据分布和负载均衡的复杂性隐藏在库中，使得没有任何并行和分布式系统经验的程序员可以轻松利用大型分布式系统的资源。</p>
+<p>MapReduce 将计算（computation）抽象为 \(Map\) 和 \(Reduce\) 函数。通常，\(Map\) 函数处理一个键值对，生成一组中间键值对。然后 MapReduce 库将具有相同中间键的值存储在一个列表中，以迭代器的方式提供给 \(Reduce\) 函数，避免因为数据量太大从而溢出到磁盘。\(Reduce\) 函数处理一个中间键以及该键的值列表，然后将列表中的值合并。</p>
+<p>以下是可以被抽象为 MapReduce 计算的问题：统计文档中单词的出现次数，Grep（模式匹配），倒排索引，排序等。</p>
 <h2 id="实现">实现</h2>
-<h3 id="基础知识">基础知识</h3>
-<p>服务器有三种状态：leader、follower、candidate，服务器初始时都是 follower。正常情况下，只有一个 leader 和多个 follower。只有 leader 会处理客户端的请求，如果客户端将请求发送给 follower，该 follower 会将其重定向到 leader。服务器之间使用远程过程调用（RPC）进行通信，基本的 Raft 算法使用两种 RPC，candidate 在选举时会发起 RequestVote RPC，leader 在复制日志和发送心跳时会发起 AppendEntries RPC（心跳消息是没有日志条目的 AppendEntries RPC）。Raft 保证 RPC 是幂等的。</p>
-<p><img src="/img/MIT_6.824.assets/1706240528316.png" alt=""></p>
-<p>时间被划分为任期（term），使用单调递增的连续整数表示。每个服务器都会持久存储当前任期，不同服务器的任期可能不同（由于故障）。服务器之间进行通信时会交换任期，处于旧任期的服务器会更新其任期。如果 leader 或 candidate 发现自己包含旧任期，它会成为 follower。如果服务器收到具有旧任期的请求，它会拒绝该请求。</p>
-<p><img src="/img/MIT_6.824.assets/1706241065591.png" alt=""></p>
-<h3 id="领导者选举">领导者选举</h3>
-<p>如果一个 follower 在超时时间（该时间被称为选举超时，election timeout）内没有收到来自 leader 或 candidate 的有效 RPC（何为有效，个人认为任期不旧就是有效），它将递增其任期成为 candidate，开始选举新的 leader。它为自己投票，然后向集群中的其它服务器发送 RequestVote RPC。</p>
-<ul>
-<li>如果 candidate 收到大多数服务器的投票，它会成为新的 leader，同时向其他服务器发送心跳消息，以建立其权威防止新的选举。每个服务器在给定的任期内，只能投票给一个 candidate。服务器是否投票给某个 candidate 存在限制，将在安全性中讨论。</li>
-<li>如果在等待投票时，candidate 收到 leader 的 AppendEntries RPC，且 leader 的任期大于等于 candidate 的任期，那么 candidate 会成为 follower。如果 leader 的任期更小，则 candidate 会拒绝该 RPC。或者收到其他 candidate 的 RequestVote RPC，且其任期大于当前 candidate 的任期，当前 candidate 同样会成为 follower。</li>
-<li>如果存在多个 candidate 使选票分裂，使得没有 candidate 可以得到大多数服务器的投票，则每个 candidate 都会超时，继续递增任期，重新开始选举。Raft 使用随机 election timeout 来确保选票分裂很少发生（避免同时超时），election timeout 是从一个固定间隔中随机选择的（例如 [150, 300] 毫秒），每个候选人在开始选举时会重新随机化 election timeout。</li>
-</ul>
-<p>如果 follower 在执行完成 AppendEntries RPC 之后，回复之前发生崩溃，则 leader 会重试 RPC。如果 follower 重新上线，它会忽略重复请求中的日志条目。如果 candidate 在发送 RequestVote RPC 之后崩溃，重启之后它会重新发送 RPC，follower 会持久存储其投票的 candidate，避免在同一任期内多次投票。</p>
-<p>为了保证系统的可用性，election timeout 存在如下要求：</p>
-<div>
-$$
-broadcastTime\ll electionTimeout\ll MTBF
-$$
-</div>
-<p>其中 \(broadcastTime\) 是发送 RPC 的平均往返时间，\(electionTimeout\) 是 follower 的超时时间，\(MTBF\) 是单个服务器的平均故障间隔时间。broadcast time 应该比 election timeout 小一个数量级，防止 follower 开始不必要的选举。election timeout 应该比 MTBF 小几个数量级，这样在 leader 真正发生故障时客户端不会等待太久。</p>
-<h3 id="日志复制">日志复制</h3>
-<p>客户端会向 leader 发送请求，请求包含由复制状态机执行的命令，leader 会将当前任期和命令作为一个条目（entry）追加到日志中（只读命令可以不记录日志，但有额外的限制，在可线性化中描述），由日志索引标识其位置。然后 leader 向其他服务器并行发送 AppendEntries RPC 以复制该条目，当大多数服务器确认复制该条目时，leader 将条目应用到其状态机（即状态机执行条目中的命令），并将执行结果返回给客户端，之后 leader 通过不断地失败重试保证剩余服务器会复制该条目。</p>
-<p><img src="/img/MIT_6.824.assets/1706265536317.png" alt=""></p>
-<p>只要创建日志条目的 leader 将其复制到大多数服务器上，该日志条目就是已提交的（committed）。注意，是创建日志条目的 leader，而不是之后的 leader，这将在安全性中讨论。Raft 保证已提交的条目是持久的，并且最终会被所有可用的状态机执行。leader 提交其创建的日志条目时，也会提交 leader 日志中在该日志条目之前的所有日志条目，包含由之前 leader 创建的条目（会在安全性中解释原因）。leader 会跟踪其已提交日志条目的最高索引，并且在之后的 AppendEntries RPC 中包含该索引，以通知 follower 哪些日志条目已提交，之后 follower 会应用已提交的日志条目到本地状态机（按照日志顺序）。</p>
-<p>Raft 的日志匹配（Log Matching）属性保证不同服务器之间日志的一致性：如果两个日志在同一索引位置的条目具有相同任期，则两个日志中所有小于等于该索引位置的条目都相同。如何实现该属性？leader 在给定任期只会对自己的日志进行追加，而不会覆盖。当 leader 向 follower 发送 AppendEntries RPC 时，会进行一致性检查。请求中会包含上一个条目的索引和任期，如果 follower 中对应索引的任期不同，则 follower 会拒绝该请求，回复 leader 匹配失败。如果系统正常运行，那么所有服务器上的日志都会相同。</p>
-<p><img src="/img/MIT_6.824.assets/1706269942802.png" alt=""></p>
-<p>但是当发生故障时，服务器之间的日志会产生不一致。如何处理不一致？leader 会为每个 follower 维护一个 nextIndex，表示 leader 下次向 follower 发送该索引位置的日志条目，如果 follower 拒绝 leader 的 AppendEntries RPC，则 leader 会将该 follower 对应的 nextIndex 递减，然后重试 RPC 直到 follower 和 leader 的日志完全相同（冲突条目将被删除）。整个过程表现为，递减 follower 的 nextIndex 到和 leader 日志最长相等前缀之后的一个位置，然后追加条目到 follower 直到其 nextIndex 和 leader 日志的尾后索引相等。</p>
-<p>可以对上述算法进行优化，不是将 nextIndex 每次递减 1，而是递减整个任期，这通过在 follower 回复的信息中包含冲突条目的任期以及该任期在其日志中的第一个索引位置来实现。从而，每个冲突的任期都需要一个 AppendEntries RPC，而不是每个冲突的条目一个 RPC。为什么直接返回第一个索引位置，论文并没有描述之后该如何处理。我的理解是，其实并不是从该索引位置开始重传日志条目，因为这样可能会导致不必要的重传已提交的日志条目。在 leader 接收到冲突的任期和第一个索引之后，应该会递增该索引直到任期不同为止（之所以可以这样，是因为日志匹配属性），然后再传递该位置的日志条目。这样关于课程中提出的问题，为什么需要返回任期，而不是只返回第一个索引，也可以得到解答。</p>
-<h3 id="安全性">安全性</h3>
-<h4 id="选举限制">选举限制</h4>
-<p>即使日志一致，两个状态机也可能执行不同的命令序列。例如，leader 提交日志时，某个 follower 可能发生故障，如果它成为 leader，它将覆盖旧 leader 中的条目，而这些条目可能已经应用于旧 leader 的状态机上。为此 Raft 的领导者完整性（Leader Completeness）属性保证在某个任期被提交的日志条目必定会出现在更高任期的 leader 日志中，从而可以保证所有状态机执行相同的命令序列。</p>
-<p>如何实现该属性？candidate 在发送 RequestVote RPC 时，会包含其日志信息，如果投票者的日志比 candidate 的日志更（读第四声）新，则投票者会拒绝投票。更新的定义如下：如果两个日志的最后一个条目具有不同任期，则更大任期的日志更新；否则，更长的日志更新。上述限制使得，只有包含所有已提交日志条目的 candidate 才有可能当选 leader，日志只会从 leader 流向 follower。</p>
-<h4 id="提交之前任期的条目">提交之前任期的条目</h4>
-<p>在日志复制中提到，创建日志条目的 leader 将其复制到大多数服务器上，则该日志条目就是已提交的。之所这样定义，是因为即使 leader 将之前任期的条目（不是由当前 leader 创建）复制到大多数服务器上，依然可能会被之后的 leader 覆盖（根据之前描述的日志匹配属性）。如果将其视为已提交，则会违反领导者完整性属性，导致状态机不一致。那么之前任期的条目何时视为已提交？当前任期的一个日志条目被提交时，由于日志匹配属性，之前任期的条目将会间接提交。</p>
-<p><img src="/img/MIT_6.824.assets/1706279525227.png" alt=""></p>
-<h3 id="日志压缩">日志压缩</h3>
-<p>日志可能会变得很大，导致崩溃恢复需要花费很多时间重放所有日志，以及日志占用大量空间，Raft 通过使用快照来压缩日志。每个服务器会定期创建快照（通常是当日志达到固定大小时），快照中包含状态机的状态、状态对应的最后一个日志条目的索引和任期（以支持 AppendEntries PRC 的一致性检查）、当时的配置信息（用于集群成员变更）。当服务器将快照持久化之后，可以删除该快照之前的日志和之前的快照（剩余日志的索引并不会重置为从 1 开始，或许会新开一个数组从 1 开始存储，但是对外来说索引总是会加上某个偏移量）。</p>
-<p><img src="/img/MIT_6.824.assets/1706500585471.png" alt=""></p>
-<p>如果有一个严重滞后或新加入集群的 follower，它需要的日志可能已经被 leader 删除，此时 leader 需要使用 InstallSnapshot RPC 向滞后的 follower 发送快照。通常快照会比 follower 的日志更新，follower 会丢弃整个日志，使用快照替代。但是，由于重传或错误，follower 可能会收到描述其日志前缀的快照，此时仅会删除快照覆盖的日志，快照之后的日志将被保留。</p>
-<p>为了避免在创建快照时停止操作，可以使用写时复制技术。状态机可以通过实现某种数据结构支持写时复制，或者使用操作系统的写时复制支持（例如，Linux 的 fork）来创建状态机的内存快照（作者使用该实现方式）。具体来说，Linux 的 fork 创建的子进程会共享和父进程相同的内存页面，如果父进程更新页面，则操作系统会对该页面执行写时复制。</p>
-<h3 id="可线性化">可线性化</h3>
-<p>什么是可线性化？每个操作似乎在其调用和响应之间的某个时刻以原子的方式执行。Raft 如何实现可线性化语义？如果 leader 在执行命令之后回复客户端之前崩溃，然后客户端在新的 leader 重试请求，将会多次执行同一个命令。如果客户端向新 leader 发送读请求，由于旧 leader 在回复客户端之后发送下一个 AppendEntries RPC 之前崩溃，新 leader 可能并没有将某些已提交的命令应用到状态机，此时客户端可能会从新 leader 读取到旧数据。如果出现网络分区故障，旧 leader 可能不知道它已经被新 leader 取代，此时客户端可能从旧 leader 读取到旧数据。</p>
-<p>首先，客户端需要为每个命令分配唯一的序列号，状态机会跟踪为每个客户端处理的最后的序列号以及相关响应。如果状态机收到已被执行的命令，它不会执行该命令而是直接返回响应。注意，日志中依然包含重复命令的日志条目。其次，每个 leader 在任期开始时会提交一个无操作日志条目，从而确定哪些日志条目已被提交并将其应用到状态机。能否通过心跳消息确定哪些日志条目已提交，个人认为不能，就是之前提到的旧任期日志条目不能通过计数判断是否已提交。最后，leader 在回复读请求之前，需要和集群中的大多数交换心跳消息，以确保它仍然是 leader（或者可以使用租约，论文中没有详细介绍，不过课程笔记中有提到具体方式）。</p>
+<p>MapReduce 的实现方式取决于使用场景，Google 的常见计算场景是通过交换式以太网连接的大型计算机集群，使用 GFS 管理存储在各个机器的磁盘上的数据。用户将作业（job）提交给调度系统，每个作业由多个任务（task）组成，通过调度系统映射到可用的机器上。有关场景的详细信息见论文，下面介绍基于该场景的 MapReduce 实现。</p>
+<h3 id="概述">概述</h3>
+<p>用户程序在调用 \(MapReduce\) 函数之后，用户程序中的 MapReduce 库首先将输入文件划分为 \(M\) 块，通常每块 16-64 MB。然后将用户程序复制到集群的多个机器上运行，由一个 master 和多个 worker 组成，master 会将一个 map 任务或 reduce 任务分配给空闲的 worker。</p>
+<p><img src="/img/MIT_6.824.assets/1704377105673.png" alt=""></p>
+<p>GFS 将所有文件划分为 64 MB 的块，并且将每个块的多个副本存储在不同的机器上。MapReduce 的 master 将 map 任务分配给包含输入文件的机器，从而可以避免通过网络传输输入数据（节省网络带宽）。</p>
+<p>map worker 从 GFS 中读取文件，解析键值对并将其传递给用户的 \(Map\) 函数。\(Map\) 函数生成的中间键值对会被分区函数划分为 \(R\) 个文件（每个 reduce 任务一个文件），存储在机器的本地磁盘。\(R\) 个中间文件的位置和大小信息会被发送给 master，然后 master 负责将这些信息发送给 reduce worker。</p>
+<p>reduce worker 收到文件的位置和大小信息之后，使用远程过程调用（RPC）从 map worker 的磁盘读取文件。当 reduce worker 读取完 \(M\) 个中间文件时，它会将数据按照中间键排序，以使相同键的键值对彼此相邻。reduce worker 迭代已排序的数据，它将唯一键以及该键对应的值列表传递给用户的 \(Reduce\) 函数。\(Reduce\) 函数合并数据，将结果写入 GFS 中的一个文件（每个 reduce 任务一个文件）。PS：GFS 会将输出文件以多个副本块的形式存储在多个机器上。</p>
+<p>当所有 map 和 reduce 任务完成之后，master 唤醒用户程序。此时，在用户程序中的 \(MapReduce\) 函数调用返回至用户代码。通常，用户不需要将这些文件合并，而是将这些文件作为另一个 MapReduce 作业的输入。</p>
+<h3 id="细节">细节</h3>
+<h4 id="Master-数据结构">Master 数据结构</h4>
+<p>对于每个 map 和 reduce 任务，master 会记录任务的状态（idle，in-progress，completed），以及非 idle 任务所在的 worker 的标识。对于每个 map 任务，master 会记录 \(R\) 个中间文件的位置和大小信息，总共记录 \(M\times R\) 个信息。</p>
+<h4 id="容错">容错</h4>
+<p><strong>worker 失效</strong></p>
+<p>master 定期对每个 worker 执行 ping 操作，如果超时未响应则将其标记为失效。失效 worker 已完成的任何 map 任务、正在执行的 map 和 reduce 任务都会被重置为 idle 状态，从而可以分配给其他 worker。</p>
+<p>已完成的 map 任务在 map worker 发生故障时需要重新执行，因为它们的输出存储在失效机器的本地磁盘上，无法被访问。而已完成的 reduce 任务将输出存储在 GFS 中，所以在发生故障时不需要重新执行。</p>
+<p>当失效的 map worker A 被 map worker B 替代时，将会通知所有 reduce worker 重新执行，任何没有从 A 读取数据的 reduce 任务将会从 B 读取数据。PS：已从 A 读取数据的 reduce 任务该如何处理，论文没有说明。我的想法是，如果已读取完，则不会有问题。如果读取到一半，那么直接丢弃即可。</p>
+<p><strong>master 失效</strong></p>
+<p>定期持久化 master 数据结构的检查点（checkpoint），如果 master 失效，则可以从上一个检查点状态重新开始。论文中表示单个 master 失效的可能性不大，所以发生故障时会中止 MapReduce 计算。</p>
+<p>PS：检查点和失效点之间的状态会丢失，有可能已完成的 map 任务没有被 master 持久记录已完成。如果持久状态是 idle，则会导致重新分配 map 任务。如果持久状态是 in-progress，则需要等待 worker 发送完成信息，但 worker 如何知道需要重新发送完成信息，这需要额外的机制。</p>
+<h4 id="任务粒度">任务粒度</h4>
+<p>一个 map 任务处理一个文件，生成 \(R\) 个中间文件，分别由 \(R\) 个 reduce 任务处理。理论上，\(M\) 和 \(R\) 的大小应该远大于 worker 的数量，从而分配更多的任务给较快的机器，以均衡负载。如果 worker 发生故障，还可以通过将任务分散到多个 worker 上来提升故障恢复的速度。</p>
+<h4 id="备份任务">备份任务</h4>
+<p>由于 MapReduce 操作需要等待所有任务完成才能够继续推进，所以少数缓慢的机器（straggler）会拖慢整个操作。当 MapReduce 操作接近完成时，master 可以冗余执行剩余的任务，以缩短 MapReduce 的执行时间。</p>
 <h2 id="问题">问题</h2>
-<p>Q：Raft 集群是部署在一个数据中心，还是多个数据中心？</p>
-<p>A：通常是一个数据中心，这样可以避免 leader 跨数据中心向多个 follower 发送 RPC（网络延迟）。</p>
-<p>Q：客户端如何知道谁是新的 leader？</p>
-<p>A：客户端包含所有 server 的地址，它可以随机发送请求，follower 会将请求重定向到它认为的 leader。</p>
-<p>Q：为什么日志的索引从 1 开始？</p>
-<p>A：可以将其视为从 0 开始，索引 0 包含任期为 0 的空日志条目，以方便 AppendEntries RPC 在初始时的一致性检查。个人认为，类似于求数组的前缀和时从索引 1 开始。</p>
-<p>Q：Raft 何时将其状态（currentTerm、votedFor、log）持久化到磁盘？</p>
-<p>A：在内存中修改状态的同时刷盘，只有持久化之后 leader 才能向 follower 发送 RPC，follower 才能回复 leader，leader 才能将命令应用到状态机。否则，如果服务器发生崩溃，Raft 的各种属性将无法得到保证。</p>
-<p>Q：图 2 中的 lastApplied 为何不需要持久化？如果发生崩溃，服务器如何知道日志条目是否应用于状态机？</p>
-<p>A：论文作者在<a target="_blank" rel="noopener" href="https://groups.google.com/g/raft-dev/c/KIozjYuq5m0">会话</a>中对该问题以及下一个问题进行了解释（推荐阅读）。实际上 lastApplied 是否被持久化取决于状态机是否被持久化。如果状态机不被持久化，那么崩溃恢复之后需要重放所有日志，所以 lastApplied 会被初始化为 0。否则，只需重放 lastApplied 之后的日志。按我的理解，由于快照的存在，以及更新状态机的同时持久化产生的随机 I/O 开销较大，所以状态机一般不会实时持久化。如果存在快照，lastApplied 会被赋值为快照中包含的索引。</p>
-<p>Q：图 2 中的 matchIndex 有什么作用？</p>
-<p>A：matchIndex 表示 follower 和 leader 匹配的最高日志条目的索引（可能会小于实际值），只要大多数 follower 的 matchIndex 超过 leader 的 commitIndex，并且 log[matchIndex] 条目的任期是当前 leader 的任期（参见提交的定义），则 leader 可以增加 commitIndex。</p>
-<p>Q：图 7 的 leader 崩溃之后，谁有可能成为新的 leader？</p>
-<p>A：服务器 acd 都有可能成为新的 leader。首先日志 9 是最后一个提交的日志条目，根据领导者完整性属性，只能从 acd 中选择 leader。同时，acd 都有可能得到大多数服务器的投票，对于 a 来说是 abef，对于 c 来说是 abcef，对于 d 来说是 abcdef。有一点需要注意，服务器最后一个日志条目的任期可能并不是其当前任期。</p>
+<p>Q：如果网络延迟导致 master 将 worker 标记为失效，master 如何处理旧 map worker 发送的中间文件信息？GFS 如何处理重复 reduce 任务的输出？</p>
+<p>A：对于 map 任务，论文提到 master 会忽略 map 任务的重复完成消息，但是它是否会接收旧 worker 的消息，毕竟已经分配新 worker 重新执行该 map 任务。不论如何，只要保证 reduce 任务只从其中一个中间文件读取数据，就没有问题。对于 reduce 任务，输出首先被写入临时文件，当任务完成时再重命名为最终文件，GFS 提供原子重命名（使用锁），从而相同 reduce 任务只会有一个输出文件。</p>
 <h2 id="总结">总结</h2>
-<p>Raft 共识算法实现可线性化一致性模型，核心内容包括领导者选举、日志复制和安全性。论文中还提到 Raft 的集群成员变更机制，我并没有做介绍。然后日志压缩可以看作是 Raft 的额外补充。如课程中所述，论文中也有很多细节没有介绍，单个机制可以有多种不同的实现方式。课程视频、问答和笔记是对论文很好的补充，其中还提到一篇文章 <a target="_blank" rel="noopener" href="https://decentralizedthoughts.github.io/2020-12-12-raft-liveness-full-omission/">Raft does not Guarantee Liveness in the face of Network Faults</a>，讲述 Raft 在特定情况下无法建立稳定的领导者，除非使用 PreVote 和 CheckQuorum 技术。可见这篇论文介绍的仅仅是 Raft 的基本实现，现实中面临各种复杂场景，或许需要添加很多额外的机制。</p>
-<h2 id="附录">附录</h2>
-<p><img src="/img/MIT_6.824.assets/1706326869038.png" alt=""></p>
-<p><img src="/img/MIT_6.824.assets/1706500649548.png" alt=""></p>
-</div></article></div><nav class="pagination" role="navigation" aria-label="pagination"><div class="pagination-previous"><a href="/categories/%E8%AF%BE%E7%A8%8B/page/5/">上一页</a></div><div class="pagination-next"><a href="/categories/%E8%AF%BE%E7%A8%8B/page/7/">下一页</a></div><ul class="pagination-list is-hidden-mobile"><li><a class="pagination-link" href="/categories/%E8%AF%BE%E7%A8%8B/">1</a></li><li><span class="pagination-ellipsis">&hellip;</span></li><li><a class="pagination-link" href="/categories/%E8%AF%BE%E7%A8%8B/page/5/">5</a></li><li><a class="pagination-link is-current" href="/categories/%E8%AF%BE%E7%A8%8B/page/6/">6</a></li><li><a class="pagination-link" href="/categories/%E8%AF%BE%E7%A8%8B/page/7/">7</a></li><li><span class="pagination-ellipsis">&hellip;</span></li><li><a class="pagination-link" href="/categories/%E8%AF%BE%E7%A8%8B/page/12/">12</a></li></ul></nav></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/dark_souls.jpg" alt="Ligh0x74"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">Ligh0x74</p><p class="is-size-6 is-block">Developer</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Earth, Solar System</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">131</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">23</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">2</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/Ligh0x74" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Ligh0x74"><i class="fab fa-github"></i></a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://ppoffice.github.io/hexo-theme-icarus/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">ICARUS</span></span><span class="level-right"><span class="level-item tag">ppoffice.github.io</span></span></a></li><li><a class="level is-mobile" href="https://waline.js.org" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Waline</span></span><span class="level-right"><span class="level-item tag">waline.js.org</span></span></a></li><li><a class="level is-mobile" href="https://vercel.com" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Vercel</span></span><span class="level-right"><span class="level-item tag">vercel.com</span></span></a></li></ul></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/"><span class="level-start"><span class="level-item">书籍</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/"><span class="level-start"><span class="level-item">CSAPP/OSTEP</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/DDIA/"><span class="level-start"><span class="level-item">DDIA</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">基础</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E6%A8%A1%E6%9D%BF/"><span class="level-start"><span class="level-item">模板</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/OceanBase/"><span class="level-start"><span class="level-item">OceanBase</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/"><span class="level-start"><span class="level-item">算法</span></span><span class="level-end"><span class="level-item tag">88</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/AtCoder/"><span class="level-start"><span class="level-item">AtCoder</span></span><span class="level-end"><span class="level-item tag">16</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/Codeforces/"><span class="level-start"><span class="level-item">Codeforces</span></span><span class="level-end"><span class="level-item tag">34</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/LeetCode/"><span class="level-start"><span class="level-item">LeetCode</span></span><span class="level-end"><span class="level-item tag">38</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><span class="level-start"><span class="level-item">设计模式</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">3</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/C/"><span class="level-start"><span class="level-item">C++</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Java/"><span class="level-start"><span class="level-item">Java</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/"><span class="level-start"><span class="level-item">课程</span></span><span class="level-end"><span class="level-item tag">23</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/"><span class="level-start"><span class="level-item">CMU 15-445</span></span><span class="level-end"><span class="level-item tag">7</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/"><span class="level-start"><span class="level-item">GAMES101</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/"><span class="level-start"><span class="level-item">MIT 6.824</span></span><span class="level-end"><span class="level-item tag">10</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-ICS-OS/"><span class="level-start"><span class="level-item">NJU ICS/OS</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/"><span class="level-start"><span class="level-item">NJU Static Analysis</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/UCB-CS61A/"><span class="level-start"><span class="level-item">UCB CS61A</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-02T13:42:42.121Z">2024-09-02</time></p><p class="title"><a href="/2024/09/02/Debugging/">Debugging</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-02T09:43:22.567Z">2024-09-02</time></p><p class="title"><a href="/2024/09/02/Lab%201%20MapReduce/">Lab 1: MapReduce</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-30T14:43:58.383Z">2024-08-30</time></p><p class="title"><a href="/2024/08/30/%E7%AE%80%E5%8D%95%E7%9C%8B%E4%B8%8B%20Tai-e%20%E6%BA%90%E7%A0%81/">简单看下 Tai-e 源码</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/">NJU Static Analysis</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-20T02:58:46.061Z">2024-08-20</time></p><p class="title"><a href="/2024/08/20/GAMES101%20%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/">GAMES101 课程总结</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/">GAMES101</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-17T15:31:02.381Z">2024-08-17</time></p><p class="title"><a href="/2024/08/17/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%20%E8%BD%AF%E4%BB%B6%E5%88%86%E6%9E%90%20%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/">南京大学 软件分析 课程总结</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/">NJU Static Analysis</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2024/"><span class="level-start"><span class="level-item">2024</span></span><span class="level-end"><span class="level-item tag">36</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/"><span class="level-start"><span class="level-item">2023</span></span><span class="level-end"><span class="level-item tag">95</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Debugging/"><span class="tag">Debugging</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hexo/"><span class="tag">Hexo</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://clist.by/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">CLIST</span></span><span class="level-right"><span class="level-item tag">clist.by</span></span></a></li><li><a class="level is-mobile" href="https://csdiy.wiki/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">CSDIY</span></span><span class="level-right"><span class="level-item tag">csdiy.wiki</span></span></a></li><li><a class="level is-mobile" href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">阮一峰的网络日志</span></span><span class="level-right"><span class="level-item tag">www.ruanyifeng.com</span></span></a></li></ul></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2024 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+<p>论文在介绍完实现之后，还提出对实现的改进、测试实现在 Grep 和 Sort 场景的性能等。MapReduce 的成功主要在于，隐藏各种细节使得 MapReduce 易于使用，很多问题都可以表示为 MapReduce 计算，而且作者开发的 MapReduce 实现可以有效利用大型计算机集群的资源。从中可以学到：限制编程模型可以使并行和分布式计算更容易，使计算具有容错性；网络带宽是稀缺资源，使用局部性优化可以节省网络带宽；冗余执行可以减少缓慢机器的影响。</p>
+</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2023-11-15T04:04:29.235Z" title="2023/11/15 下午12:04:29">2023-11-15</time>发表</span><span class="level-item"><time dateTime="2024-02-29T07:39:50.562Z" title="2024/2/29 下午3:39:50">2024-02-29</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a><span> / </span><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/">CMU 15-445</a></span><span class="level-item">1 小时读完 (大约7888个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2023/11/15/CUM%2015-445%20%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/">CUM 15-445 课程总结</a></p><div class="content"><p><a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/schedule.html">幻灯片和笔记</a>，<a target="_blank" rel="noopener" href="https://zhenghe.gitbook.io/open-courses/">其他同学整理的笔记</a>，<a target="_blank" rel="noopener" href="https://discord.com/channels/724929902075445281/752529819148877904">Discord 讨论</a>，<a target="_blank" rel="noopener" href="https://dbdb.io/">dbdb.io</a>。</p>
+<p>本来想做个课程总结和项目总结的，但是有点没心情做，排行榜优化也暂时搁置吧。:(</p>
+<p>更新：还是做一下总结，课程的内容不只下面这些，有很多内容对我来说可能用不到，所以没有记录。</p>
+<hr>
+<h2 id="Advanced-SQL">Advanced SQL</h2>
+<p>查询满足某个条件的记录数量：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT COUNT(*) FROM t WHERE xx;</span><br><span class="line">SELECT SUM(IF(xx, 1, 0)) FROM t;</span><br></pre></td></tr></table></figure>
+<p>查询满足某个条件的记录百分率：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT ROUND(AVG(IFNULL(xx, 0)), 2) FROM t;</span><br></pre></td></tr></table></figure>
+<p>窗口函数（文档：<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/window-functions.html">12.20 Window Functions</a>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT ROW_NUMBER() OVER(PARTITION BY xx ORDER BY xx) FROM t;</span><br><span class="line">SELECT AVG(xx) OVER (PARTITION BY xx ORDER BY xx ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING)</span><br></pre></td></tr></table></figure>
+<p>日期和时间函数（文档：<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html">12.7 Date and Time Functions</a>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SELECT DATE_FORMAT(xx, xx);</span><br><span class="line">SELECT DATEDIFF(xx, xx);</span><br></pre></td></tr></table></figure>
+<h2 id="Database-Storage">Database Storage</h2>
+<p>课程主要介绍面向磁盘的 DBMS，数据库以文件的形式存储在磁盘上，文件以特定于 DBMS 的方式编码，它被表示为页面的集合，每个页面都会有一个唯一标识符（页面 ID），大多数 DBMS 使用哈希表将页面 ID 映射为文件路径和文件内的偏移量。注意区分硬件页面（通常为 4 KB）、操作系统页面（4 KB）和数据库页面（1-16 KB）。存储设备可以保证硬件页面的原子写入，如果数据库页面大于硬件页面，则 DBMS 需要采取额外的措施来保证原子性。</p>
+<p>每个页面被分为两部分：页面头部和页面内容。页面头部用于记录有关页面内容的元数据，包括页面大小、校验和、DBMS 版本、事务可见性和自包含（Self-containment）等。页面内容有两种主要的数据布局方式：slotted-pages 和 log-structured。</p>
+<h2 id="Storage-Models-Compression">Storage Models &amp; Compression</h2>
+<p>三种工作负载：OLTP（在线事务处理），OLAP（在线分析处理），HTAP（混合事务和分析处理）。</p>
+<p>两种存储模型：行式存储和列式存储。</p>
+<h2 id="Memory-Management">Memory Management</h2>
+<p>缓冲池实际上是一个页面数组，用于缓存磁盘中的页面，为了区分缓冲池页面和磁盘页面，我们将缓冲池页面称为帧（frame）。当 DBMS 请求一个页面时，存储管理器会首先搜索缓冲池，如果页面不在缓冲池中，就将该页面从磁盘复制到空闲的帧中。（有关缓冲池的详细信息可以参考 Project #1）</p>
+<p><img src="/img/CMU_15-445.assets/1702556645114.png" alt=""></p>
+<p>缓冲池优化方式：</p>
+<ul>
+<li>多缓冲池：可以为不同数据库或不同页面类型提供不同的缓冲池，这样可以根据其中的数据定制优化策略。</li>
+<li>预取：可以根据查询计划预取页面，通常在顺序访问页面时进行该优化。</li>
+<li>扫描共享（同步扫描）：当多个查询扫描的数据存储重叠时，重叠部分可以只进行一次扫描。</li>
+<li>缓冲池绕过：顺序扫描或临时数据处理不会将页面存储在缓冲池中，而是为其单独开一块内存，以避免缓冲池污染，因为这些页面通常不会再被访问。</li>
+</ul>
+<p>大部分数据库使用直接 I/O 绕过操作系统缓存，以避免多余的页面缓存（Postgres 除外）。</p>
+<h2 id="Hash-Tables">Hash Tables</h2>
+<p>哈希表的实现由两部分组成：</p>
+<ul>
+<li>哈希函数：需要在计算速度和冲突率之间进行权衡。</li>
+<li>哈希模式：发生冲突时如何处理。（静态哈希和动态哈希）</li>
+</ul>
+<h2 id="Trees-Indexes">Trees Indexes</h2>
+<p>索引的数量越多，查询的速度就越快，但是索引占用的存储空间以及维护成本也会随之提高。</p>
+<p>B+ 树是一种平衡查找树，它保持数据有序，并且支持 \(O(\log{n})\) 的查询、插入和删除操作。B+ 树平衡的关键在于，它要求所有节点都至少是半满的。B 树在所有节点中存储值，而 B+ 树只在叶子节点中存储值。B+ 树相比哈希表的优势在于可以进行范围查询以及模糊查询。（有关 B+ 树的详细信息可以参考 Project #2）</p>
+<h2 id="Index-Concurrency-Control">Index Concurrency Control</h2>
+<p>区分 Lock 和 Latch：</p>
+<ul>
+<li>Lock：高级原语，作用是保护数据库的内容（元组、表和数据库），在事务中使用。</li>
+<li>Latch：低级原语，作用是保护数据库的内部数据结构，在临界区中使用。</li>
+</ul>
+<p>实现 Latch 的底层原语是比较并交换（CAS）原子指令。有多种不同类型的 Latch 可供 DBMS 使用：</p>
+<ul>
+<li>Blocking OS Mutex：使用操作系统内置的互斥锁基础设施，Linux 提供 futex（fast user-space mutex），它由用户空间的自旋锁和操作系统级别的互斥锁组成。示例 <code>std::mutex</code>，优点是使用简单，缺点是加锁/解锁的时间成本较高并且不可扩展（如果发生竞争，则当前线程会被操作系统阻塞）。</li>
+<li>Test-and-Set Spin Latch（TAS）：自旋锁具有更高的灵活性，DBMS 可以控制当存在竞争时应该执行什么操作。示例 <code>std::atomic&lt;T&gt;</code>，优点是加锁/解锁更快，缺点是在竞争比较激烈时，会浪费很多 CPU 资源。</li>
+<li>Reader-Writer Latches：示例 <code>std::shared_mutex</code>，优点是可以并发读取，缺点是需要额外的空间存储读/写队列。</li>
+</ul>
+<p>B+ 树使用蟹行协议（Latch Crabbing Protocol）来保证自上而下的加锁顺序，当线程的访问模式不包含叶节点扫描时，该实现方式可以避免死锁。因为索引锁不支持死锁检测或避免（疑问：这里的描述和<a target="_blank" rel="noopener" href="https://15445.courses.cs.cmu.edu/spring2023/slides/09-indexconcurrency.pdf">幻灯片</a>第 23 页的内容不太一样），所以叶节点扫描在获取同级锁时遵循无等待模式，即如果获取同级锁失败就立即重启操作。</p>
+<h2 id="Sorting-Aggregations-Algorithms">Sorting &amp; Aggregations Algorithms</h2>
+<p>排序可能被用在 ORDER BY、GROUP BY、JOIN 和 DISTINCT 操作中。如果数据能够放入内存，则可以使用快速排序（当查询包含 LIMIT 和 ORDER BY 时，可以使用堆排序），否则使用外部归并排序。</p>
+<p>外部归并排序由两部分组成：</p>
+<ul>
+<li>排序：将数据分为多个可以放入内存的数据块，分别进行排序，然后将排序后的数据写回磁盘。</li>
+<li>合并：将排序后的数据块合并。</li>
+</ul>
+<p>外部归并排序的 I/O 成本分析：</p>
+<ul>
+<li>假设 \(N\) 为数据页面的个数，\(B\) 为可以使用的缓冲区页面的个数。</li>
+<li>在排序阶段，每次可以读取 \(B\) 个数据页面到缓冲区，进行排序之后写回磁盘，总共执行 \(\lceil \frac{N}{B}\rceil\) 次排序，I/O 成本为 \(2N\)（读入缓冲区和写回磁盘各一次）。</li>
+<li>在合并阶段，可以使用 \(B-1\) 个缓冲区页面存储 \(B-1\) 个数据块的第一个页面，剩下一个缓冲区页面存储合并的结果并根据需要写回磁盘，如果将合并的过程看作多叉树，则树的高度为 \(\lceil\log_{B-1}{\lceil \frac{N}{B}\rceil}\rceil\)，每层合并都会将所有数据读写一次，I/O 成本为 \(2N\times\lceil\log_{B-1}{\lceil \frac{N}{B}\rceil}\rceil\)。</li>
+<li>最后，总 I/O 成本为 \(2N\times(1+\lceil\log_{B-1}{\lceil \frac{N}{B}\rceil}\rceil)\)。</li>
+</ul>
+<p>外部归并排序可以使用双缓冲区优化，前台缓冲区进行计算的同时，后台缓冲区预取数据。如果数据在排序键上存在 B+ 树聚集索引，那么可以直接遍历索引得到有序数据。因为，如果是聚集索引，数据访问将是顺序 I/O，成本为 \(N\)；如果是非聚集索引，数据访问将是随机 I/O，成本为 \(N\times M\)，其中 \(M\) 为每页中的记录个数（缓冲区大小有限，随机 I/O 会导致页面抖动）。</p>
+<p>聚合操作有两种实现方式：</p>
+<ul>
+<li>排序：首先将数据按照聚合键进行排序，然后对有序数据执行顺序扫描来计算聚合值。</li>
+<li>哈希：除非数据已经有序，否则哈希总是比排序更高效。由于内存可能容纳不下整个哈希表，为了避免随机 I/O，肯定不能将哈希表直接溢出到磁盘。我们可以首先进行一次哈希，将数据分区，然后对每个分区单独进行聚合操作，这样每个分区的哈希表大小应该会足够小，最好情况是能放入内存中。</li>
+</ul>
+<h2 id="Joins-Algorithms">Joins Algorithms</h2>
+<p>连接操作有两种输出模式：</p>
+<ul>
+<li>提前物化（early materialization）：将外表和内表的所有属性都放入临时表。</li>
+<li>延迟物化（late materialization）：只将连接键以及外表和内表的记录 ID 放入临时表。</li>
+</ul>
+<p>连接算法的 I/O 成本分析（假设连接是等值连接）：</p>
+<ul>
+<li>假设外表 \(R\) 有 \(M\) 页，总共包含 \(m\) 个元组；内表 \(S\) 有 \(N\) 页，总共包含 \(n\) 个元组。</li>
+<li>Nested Loop Join：
+<ul>
+<li>该算法由两个嵌套的 <code>for</code> 循环组成，外层循环遍历外表，内层循环遍历内表，如果两个元组满足连接谓词，则将它们连接并输出。注意，我们总是应该使用较小的表作为外表，因为。</li>
+<li>Naive Nested Loop Join：对于外表的每个元组，将其和内表中的每个元组进行比较，I/O 成本为 \(M+(m\times N)\)。</li>
+<li>Block Nested Loop Join：对于外表的每个块，将其和内表中的每个元组进行比较。假设有 \(B\) 个可用的缓冲区，该算法可以使用 \(B-2\) 个缓冲区扫描外表，\(1\) 个缓冲区扫描内表，\(1\) 个缓冲区存储连接结果，I/O 成本为 \(M+(\lceil \frac{M}{B-2}\rceil\times N)\)。</li>
+<li>Index Nested Loop Join：如果内表在连接键上建有索引（或者临时建立索引），那么可以直接使用索引搜索到满足条件的元组，I/O 成本为 \(M+(m\times C)\)，其中 \(C\) 为单次索引搜索的成本。</li>
+</ul>
+</li>
+<li>Sort-Merge Join：
+<ul>
+<li>首先对外表和内表进行排序，然后使用双指针分别遍历外表和内表，来进行连接谓词判断。如果内表的连接键有重复值，那么内表指针在匹配时可能需要回退。当外表或内表已经有序，或者输出结果要求按照连接键排序时，可以选择使用该算法。</li>
+<li>排序成本：外表为 \(2M\times(1+\lceil\log_{B-1}{\lceil \frac{M}{B}\rceil}\rceil)\)，内表为 \(2N\times(1+\lceil\log_{B-1}{\lceil \frac{N}{B}\rceil}\rceil)\)。</li>
+<li>合并成本：最坏情况下，两个表中的所有元组的连接键都相等，合并的成本为 \(MN\)。一般情况下，连接键大多是唯一的，合并成本为 \(M+N\)。</li>
+</ul>
+</li>
+<li>Hash Join：
+<ul>
+<li>Basic Hash Join：首先将外表的连接键作为 key 构建哈希表，将外表的元组或者元组 ID 作为 value。然后对于内表中的每个元组，可以直接通过哈希表获取匹配的元组。由于可能存在哈希冲突，即使元组被哈希到某个桶，在桶内肯定还需要进行比较来判断元组是否真的匹配，这里我们可以额外使用布隆过滤器来过滤元组，以减少磁盘 I/O。</li>
+<li>Grace Hash Join / Partitioned Hash Join：当哈希表无法放入内存时，Basic Hash Join 存在页面抖动问题，解决该问题的方法是进行分区。首先分别对外表和内表构建哈希表，并根据需要写入磁盘，如果单个桶都无法放入内存，则递归的进行分区（前提是桶内的键存在不同，否则会导致无限递归），I/O 成本为 \(2\times(M+N)\)。然后将外表和内表对应的桶进行嵌套循环连接，此时页面都可以放入内存，I/O 成本为 \(M+N\)。</li>
+</ul>
+</li>
+</ul>
+<p>假设 \(M=10^{3}\)，\(m=10^{5}\)，\(N=5\times 10^{2}\)，\(n=4\times 10^{4}\)，\(B=100\)，每页的 I/O 花费 \(0.1\) 毫秒，各个算法花费的时间如下：</p>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>I/O Cost</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Naive Nested Loop Join</td>
+<td>\(M+(m\times N)\)</td>
+<td>1.4 hours</td>
+</tr>
+<tr>
+<td>Block Nested Loop Join</td>
+<td>\(M+(M\times N)\)</td>
+<td>50 seconds</td>
+</tr>
+<tr>
+<td>Index Nested Loop Join</td>
+<td>\(M+(m\times C)\)</td>
+<td>Varies</td>
+</tr>
+<tr>
+<td>Sort-Merge Join</td>
+<td>\(M+N+(sort cost)\)</td>
+<td>0.75 seconds</td>
+</tr>
+<tr>
+<td>Hash Join</td>
+<td>\(3\times(M+N)\)</td>
+<td>0.45 seconds</td>
+</tr>
+</tbody>
+</table>
+<p>该表是课程笔记上的，但是有点疑问，Block Nested Loop Join 的 I/O 成本计算公式有问题吧，如果按照之前说的公式计算，I/O 花费的时间是 \(0.65\) 秒。</p>
+<h2 id="Query-Execution">Query Execution</h2>
+<p>DBMS 将 SQL 语句转化为查询计划，查询计划由操作符构成的树表示，数据从叶子节点流向根节点，根节点的输出就是查询的结果。处理模型（processing model）定义系统如何执行查询计划，下面介绍三种处理模型：</p>
+<ul>
+<li>迭代器模型/火山模型（Iterator Model）：每个操作符都会实现 <code>Next</code> 函数，该函数由其父节点调用，以获取子节点的输出元组。因为每次调用只会返回单个元组，所以 <code>Next</code> 函数的调用一般放在循环中。调用从根节点传递到叶子节点，数据从叶子节点通过层层处理返回至根节点（实际上就是一个递归的过程，有点像树的后序遍历）。该模型允许以流水线的方式处理元组，有些操作符需要其子节点传递所有元组才能进行计算，包括哈希连接、子查询和排序等，这些操作符被称为流水线破坏者（pipeline breakers）。</li>
+<li>物化模型（Materialization Model）：每个操作符都会实现 <code>Output</code> 函数，该函数会返回所有元组。该模型相比迭代器模型可以减少函数的调用次数，适合 OLTP 工作负载，因为其单词查询访问的数据量不大，而 OLAP 工作负载会查询大量数据，操作符的返回结果将会溢出到磁盘，从而增加 I/O 成本。</li>
+<li>向量模型（Vectorization Model）：类似迭代器模型，区别在于每次调用 <code>Next</code> 会返回一批元组（即向量）。该模型适合访问大量数据的 OLAP 工作负载，相比迭代器模型，它可以减少函数调用的次数，还可以允许使用 SIMD 指令成批的处理元组。</li>
+</ul>
+<p>PS：这些模型实际上是很简单的东西，无非就是返回的数据量不同，写这么多是不是有点浪费笔墨，额。这让我想起之前的一个感想，有些术语看上去很难懂，但是它们的本质其实非常简单，所以有些东西真的是增加学习难度。如无必要，勿增实体，不知道放在这合不合适。</p>
+<h2 id="Query-Planning-Optimization">Query Planning &amp; Optimization</h2>
+<p>应用程序连接到数据库并发送 SQL 查询，该查询可以被重写为不同的形式，然后查询被解析为抽象语法树，绑定器通过查看系统目录，将语法树中的命名对象替换为内部标识，并生成逻辑计划，该逻辑计划同样可以被重写，之后优化器使用成本模型进行估计，将逻辑计划转化为物理计划。</p>
+<p>逻辑计划和物理计划的区别：逻辑计划只描述了抽象的关系代数表达式，物理计划将抽象的表达式对应到某个具体实现，例如连接运算符有多种不同实现。逻辑计划和物理计划并不总是一一对应的。</p>
+<p><img src="/img/CMU_15-445.assets/1702556752782.png" alt=""></p>
+<p>查询优化有启发式优化（heuristics）和基于成本的搜索（cost-based search）两种策略：</p>
+<ul>
+<li>启发式方法将查询的各个部分与已知的模式进行匹配，以将其转换为更有效的模式。</li>
+<li>基于成本的搜索枚举等价的查询计划，然后选择成本最低的那个。</li>
+</ul>
+<p>基于成本的搜索，如何估计谓词的选择性（就是谓词选择的数据占总数据的比率）：</p>
+<ul>
+<li>关系 \(R\) 中的元组数量 \(N_{R}\)，属性 \(A\) 的不同值的数量 \(V(A,R)\)。使用这两个信息就可以计算出每个属性值的平均记录数 \(\frac{N_{R}}{V(A,R)}\)，称作选择基数（selection cardinality）。DBMS 可以根据选择基数估计谓词的选择性。</li>
+<li>由于数据并不是均匀分布的，各个谓词之间也不是相互独立的，所以通过选择基数估计谓词的选择性偏差较大。DBMS 还可以维护等宽/等深直方图，或者对原表进行抽样得到类似原表分布的副本表，然后通过遍历副本表来计算选择性。</li>
+</ul>
+<h2 id="Concurrency-Control-Theory">Concurrency Control Theory</h2>
+<p>关键问题：如何避免竞态条件（race condition），以及实现崩溃恢复。</p>
+<p>事务的 ACID 原则：</p>
+<ul>
+<li>原子性：事务中的操作要么全部执行，要么都不执行。有两种实现方式：日志（主流实现），写时复制。</li>
+<li>一致性：数据在逻辑上是正确的，遵循完整性约束。</li>
+<li>隔离性：并发执行的事务相互隔离，就像在串行执行一样，通过使用并发控制协议（concurrency control protocol）实现。并发事务之间存在三种冲突：读写冲突（不可重复读），写读冲突（脏读），写写冲突（丢失修改）。</li>
+<li>持久性：已提交的事务所做的修改将会持久化到磁盘上。</li>
+</ul>
+<h2 id="Two-Phase-Locking-Concurrency-Control">Two-Phase Locking Concurrency Control</h2>
+<p>两阶段锁（2PL）是一种悲观的并发控制协议，将事务执行过程分为两个阶段：加锁阶段（Growing）和解锁阶段（Shrinking）。两阶段锁存在脏读和死锁等问题，它有多个变体：</p>
+<ul>
+<li>Conservative Two-Phase Locking（C2PL）：在事务开始时获取需要的所有锁，此协议可以避免死锁。</li>
+<li>Strict Two-Phase Locking（S2PL）：事务结束时释放写锁，读锁可以在解锁阶段逐步释放，此协议可以避免脏读。</li>
+<li>Strong Strict Two-Phase Locking（SS2PL）：事务结束时释放读/写锁，此协议在 S2PL 的基础上保证了事务的提交顺序（Commitment Ordering，CO）。</li>
+</ul>
+<p>死锁是事务之间发生循环等待的现象，2PL 中有两种处理死锁的方法：</p>
+<ul>
+<li>死锁检测：DBMS 定期构建等待图，如果图中存在环，则通过中止环中的某个事务，来打破循环。</li>
+<li>死锁预防：当一个事务试图获取另一个事务持有的锁时，DBMS 会中止两个事务中的某个事务，从而避免死锁。</li>
+</ul>
+<p>锁兼容矩阵图：</p>
+<p><img src="/img/CMU_15-445.assets/1699929922561.png" alt=""></p>
+<p>锁升级矩阵图：</p>
+<table>
+<thead>
+<tr>
+<th>持有锁</th>
+<th>目标锁</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IS</td>
+<td>S，X，IX，SIX</td>
+</tr>
+<tr>
+<td>S</td>
+<td>X，SIX</td>
+</tr>
+<tr>
+<td>IX</td>
+<td>X，SIX</td>
+</tr>
+<tr>
+<td>SIX</td>
+<td>X</td>
+</tr>
+</tbody>
+</table>
+<p>存在的异常：脏读、不可重复读和幻读。隔离级别：读未提交、读已提交、可重复读和可串行化。（基于 2PL 实现的隔离级别、死锁检测可以参考 Project #4）</p>
+<h2 id="Timestamp-Ordering-Concurrency-Control">Timestamp Ordering Concurrency Control</h2>
+<p>Timestamp Ordering（T/O）和 Optimistic Concurrency Control（OCC） 都是乐观的并发控制协议，这些协议假设事务之间很少发生冲突，并且使用时间戳而不是锁来控制事务的执行顺序。</p>
+<p>Basic Timestamp Ordering（BASIC T/O）：每个事务都会被分配唯一的时间戳，每个数据库对象都会记录最后一次被读/写的时间戳。每当事务读/写数据库对象时，都会将事务时间戳和对象时间戳做比较，以此确定操作是否能够执行。事务还需要保留对象的本地副本，以确保可重复读。</p>
+<p>Optimistic Concurrency Control（OCC）：该协议将数据库对象复制到本地进行更改（写时复制），当事务想要提交时，进行冲突检测（比较事务的时间戳），如果通过则将事务的本地更改应用到数据库。</p>
+<p>PS：这节课有点没太明白，特别是 OCC 的验证阶段看不懂。</p>
+<h2 id="Multi-Version-Concurrency-Control">Multi-Version Concurrency Control</h2>
+<p>多版本并发控制（MVCC）：DBMS 维护数据库中单个逻辑对象的多个物理版本，当事务开始时，DBMS 会创建数据库快照（通过复制事务状态表），然后根据快照来确定事务可见的对象版本。</p>
+<p>MCC 有四个重要的设计决策：使用什么并发控制协议（2PL、T/O、OCC），多版本的存储方式，垃圾收集（回收对所有事务都不可见的版本），索引管理（辅助索引存储对象的逻辑指针还是物理指针，主键索引总是存储对象的物理指针）。</p>
+<p><img src="/img/CMU_15-445.assets/1702698068896.png" alt=""></p>
+<h2 id="Database-Logging">Database Logging</h2>
+<p>崩溃恢复算法的两个关键原语：</p>
+<ul>
+<li>UNDO：回滚不完整的更改。</li>
+<li>REDO：如果已提交事务的更改没有写入磁盘，则重做这些更改。</li>
+</ul>
+<p>两个崩溃恢复算法：</p>
+<ul>
+<li>写时复制：字面意思。该算法的 UNDO 操作就是删除所有页面副本，没有 REDO 操作，因为事务提交的同时会原子的修改数据库根节点的指针，即已提交的事务必定会将更改落实到数据库中。</li>
+<li>预写日志（Write-Ahead Logging，WAL）：日志首先存放在日志缓冲区中，DBMS 必须先将日志写入磁盘（顺序 I/O），然后才能将脏页写入磁盘（不需要立即执行，可以使用后台线程进行写入操作）。只有当日志写入磁盘，事务才能被视为已提交。DBMS 可以通过批量提交事务，来避免频繁的日志 I/O 操作。每个日志记录都包含：事务 ID，对象 ID，之前的值（用于 UNDO），之后的值（用于 REDO）。（这里应该是指物理日志）</li>
+</ul>
+<p>日志的模式（Logging Schemes）：</p>
+<ul>
+<li>物理日志（Physical Logging）：记录数据的字节级更改。</li>
+<li>逻辑日志（Logical Logging）：记录 INSERT、DELETE 和 UPDATE 语句。</li>
+<li>混合日志（Physiological Logging）：混合方法，以逻辑地址（页面中的槽号）的方式记录物理日志。</li>
+</ul>
+<p><img src="/img/CMU_15-445.assets/1702712010645.png" alt=""></p>
+<h2 id="Database-Recovery">Database Recovery</h2>
+<p>Algorithms for Recovery and Isolation Exploiting Semantics（ARIES） 是由 IBM 在 1990 年代开发出的恢复算法，该算法包含三个关键概念：</p>
+<ul>
+<li>Write Ahead Logging：先将日志写入磁盘，才能将脏页写入磁盘。</li>
+<li>Repeating History During Redo：数据库重启时，重做日志将数据库恢复到崩溃之前的状态。</li>
+<li>Logging Changes During Undo：将回滚操作记录到日志中，以确保再次崩溃时不会重复回滚。</li>
+</ul>
+<p>该算法为每个日志记录分配全局唯一的日志序列号（log sequence number，LSN），系统中的各个组件会跟踪与其相关的 LSN。每个数据页面会包含最近一次更新对应的 LSN（\(pageLSN\)），缓冲池会包含已经刷到磁盘的最大 LSN（\(flushedLSN\)），DBMS 在将第 \(i\) 页刷新到磁盘之前，必须保证 \(pageLSN_{i}\leq flushedLSN\)，即预写日志。</p>
+<p><img src="/img/CMU_15-445.assets/1702715490167.png" alt=""></p>
+<p><img src="/img/CMU_15-445.assets/1702715656145.png" alt=""></p>
+<ul>
+<li>事务提交：DBMS 首先将 <code>COMMIT</code> 日志记录写入日志缓冲区，然后将日志刷新到磁盘（顺序 I/O）。当日志已经成功刷新到磁盘之后，DBMS 就会向应用程序返回事务提交成功的信息。在之后的某个时刻，DBMS 将 <code>TXN-END</code> 日志记录写入日志缓冲区，表明该事务已经完成。（额，课程中没有说明在这段时间内，事务会执行什么操作）</li>
+<li>事务中止：每个日志记录会包含 \(prevLSN\) 字段，表示该 LSN 在事务中对应的上一个 LSN 是多少。DBMS 使用 \(prevLSN\) 维护事务的日志链表，以方便进行 UNDO 操作。这里引入一个新类型的日志 compensation log record（CLR），表示所执行的 UNDO 操作，该类型的日志不会被 UNDO。事务中止时，DBMS 首先将 <code>ABORT</code> 日志记录写入日志缓冲区，然后根据 <code>ABORT</code> 日志的 \(prevLSN\) 回滚事务的更新，当回滚完成时 DBMS 将 <code>TXN-END</code> 日志记录写入日志缓冲区。</li>
+</ul>
+<p><img src="/img/CMU_15-445.assets/1702970281628.png" alt=""></p>
+<p>为了避免数据库崩溃之后重做整个日志，DBMS 会定期设置检查点（Checkpoint，其实就是存档），在设置检查点时会将缓冲池中的所有脏页都刷新到磁盘中，Checkpoint 有下面几种实现方式：</p>
+<ul>
+<li>Blocking Checkpoints：首先停止开始新事物，等待活动事务完成，然后将日志和脏页刷新到磁盘，最后将 <code>CHECKPOINT</code> 日志记录写入缓冲区并刷新到磁盘。之所以要停止并等待事务，是为了避免丢失更新。</li>
+<li>Slightly Better Blocking Checkpoints：在开始设置检查点时，会记录内部系统的状态，从而不必等待活动事务完成，取而代之的是暂停活动事务。内部系统状态包括：Active Transaction Table（ATT）和 Dirty Page Table（DPT）。</li>
+<li>Fuzzy Checkpoints：通过使用额外的日志记录（<code>CHECKPOINT-BEGIN</code> 和 <code>CHECKPOINT-END</code>）跟踪检查点的边界，从而不需要暂停活动事务。</li>
+</ul>
+<p>ARIES 算法在 DBMS 崩溃重启之后执行，分为三个阶段：</p>
+<ul>
+<li>分析（Analysis）：从 \(MasterRecord\) 对应检查点开始扫描日志，以构建 ATT 和 DPT，它们包含崩溃时缓冲池中存在的脏页以及活动的事务信息。</li>
+<li>重做（Redo）：从 DPT 的所有脏页中最小的 \(recLSN\) 开始重做，即所有脏页中最旧的修改日志记录。</li>
+<li>回滚（Undo）：从崩溃时所有活动事务中最旧的日志记录开始，撤销崩溃时活动事务所做的修改。</li>
+</ul>
+<p><img src="/img/CMU_15-445.assets/1702973894697.png" alt=""></p>
+<h2 id="Introduction-to-Distributed-Databases">Introduction to Distributed Databases</h2>
+<p>并行数据库和分布式数据库的区别：</p>
+<table>
+<thead>
+<tr>
+<th>并行数据库</th>
+<th>分布式数据库</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>节点之间距离较近</td>
+<td>节点之间距离较远</td>
+</tr>
+<tr>
+<td>节点之间使用高速局域网连接</td>
+<td>节点之间使用公共网络连接</td>
+</tr>
+<tr>
+<td>通信的成本很小且可靠</td>
+<td>通信的成本很高且不可靠</td>
+</tr>
+</tbody>
+</table>
+<p>DBMS 的系统架构指定 CPU 可以访问哪些共享资源，有如下四种架构方式：</p>
+<p><img src="/img/CMU_15-445.assets/1702985468502.png" alt=""></p>
+<p>一致性哈希：</p>
+<ul>
+<li>优势：假设有 \(n\) 个键，\(m\) 个节点，则一致性哈希平均只需要对 \(\frac{n}{m}\) 个键进行再散列。</li>
+<li>原理：使用哈希函数将键和节点映射到圆上，每个键都会被分配给在顺时针方向上的下一个节点。每当添加一个节点时，只需要对其顺时针方向的下一个节点上的键进行再散列；每当删除一个节点时，只需要将当前节点的键移动到顺时针方向的下一个节点。（相当于多个节点将圆划分为多个圆弧，每个节点只包含映射到对应圆弧上的键）</li>
+</ul>
+<h2 id="Distributed-OLTP-Database-Systems">Distributed OLTP Database Systems</h2>
+<p>如果某个事务需要访问多个节点上的数据（由于数据分区），则其是分布式事务。提交分布式事务时，根据协议的不同，可能需要得到所有或大多数节点的同意。原子提交协议（Atomic Commit Protocols）有：Two-Phase Commit，Three-Phase Commit，Paxos，Raft，ZAB，Viewstamped Replication。如果节点不可信，则需要使用拜占庭容错（byzantine fault tolerant）协议。</p>
+<p>PS：虽然该课程将以上算法统称为原子提交协议，但是 2PC/3PC 和其他共识算法有一个显著的区别，就是 2PC/3PC 通常用于分布式事务，而其他共识算法通常用于数据复制。前者涉及多个节点上的不同数据，且协调器存在单点故障。后者涉及多个节点上的相同数据，且基于多数原则，不存在单点故障。可以将 2PC/3PC 和其他共识算法结合使用，从而消除单点故障（例如 Spanner 分布式数据库所做的）。</p>
+<p>CAP 定理（Consistency，Availability，Partition tolerance）：指在发生网络分区故障时，要么选择一致性（指的是可线性化），要么选择可用性（允许读写网络分区节点）。</p>
+</div></article></div><nav class="pagination" role="navigation" aria-label="pagination"><div class="pagination-previous"><a href="/categories/%E8%AF%BE%E7%A8%8B/page/5/">上一页</a></div><div class="pagination-next"><a href="/categories/%E8%AF%BE%E7%A8%8B/page/7/">下一页</a></div><ul class="pagination-list is-hidden-mobile"><li><a class="pagination-link" href="/categories/%E8%AF%BE%E7%A8%8B/">1</a></li><li><span class="pagination-ellipsis">&hellip;</span></li><li><a class="pagination-link" href="/categories/%E8%AF%BE%E7%A8%8B/page/5/">5</a></li><li><a class="pagination-link is-current" href="/categories/%E8%AF%BE%E7%A8%8B/page/6/">6</a></li><li><a class="pagination-link" href="/categories/%E8%AF%BE%E7%A8%8B/page/7/">7</a></li><li><a class="pagination-link" href="/categories/%E8%AF%BE%E7%A8%8B/page/8/">8</a></li></ul></nav></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/dark_souls.jpg" alt="Ligh0x74"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">Ligh0x74</p><p class="is-size-6 is-block">Developer</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Earth, Solar System</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">132</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">23</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">2</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/Ligh0x74" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Ligh0x74"><i class="fab fa-github"></i></a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://ppoffice.github.io/hexo-theme-icarus/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">ICARUS</span></span><span class="level-right"><span class="level-item tag">ppoffice.github.io</span></span></a></li><li><a class="level is-mobile" href="https://waline.js.org" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Waline</span></span><span class="level-right"><span class="level-item tag">waline.js.org</span></span></a></li><li><a class="level is-mobile" href="https://vercel.com" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Vercel</span></span><span class="level-right"><span class="level-item tag">vercel.com</span></span></a></li></ul></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/"><span class="level-start"><span class="level-item">书籍</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/"><span class="level-start"><span class="level-item">CSAPP/OSTEP</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/DDIA/"><span class="level-start"><span class="level-item">DDIA</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">基础</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E6%A8%A1%E6%9D%BF/"><span class="level-start"><span class="level-item">模板</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/OceanBase/"><span class="level-start"><span class="level-item">OceanBase</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/"><span class="level-start"><span class="level-item">算法</span></span><span class="level-end"><span class="level-item tag">88</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/AtCoder/"><span class="level-start"><span class="level-item">AtCoder</span></span><span class="level-end"><span class="level-item tag">16</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/Codeforces/"><span class="level-start"><span class="level-item">Codeforces</span></span><span class="level-end"><span class="level-item tag">34</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/LeetCode/"><span class="level-start"><span class="level-item">LeetCode</span></span><span class="level-end"><span class="level-item tag">38</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><span class="level-start"><span class="level-item">设计模式</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">3</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/C/"><span class="level-start"><span class="level-item">C++</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Java/"><span class="level-start"><span class="level-item">Java</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/"><span class="level-start"><span class="level-item">课程</span></span><span class="level-end"><span class="level-item tag">24</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/"><span class="level-start"><span class="level-item">CMU 15-445</span></span><span class="level-end"><span class="level-item tag">7</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/"><span class="level-start"><span class="level-item">GAMES101</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/"><span class="level-start"><span class="level-item">MIT 6.824</span></span><span class="level-end"><span class="level-item tag">11</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-ICS-OS/"><span class="level-start"><span class="level-item">NJU ICS/OS</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/"><span class="level-start"><span class="level-item">NJU Static Analysis</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/UCB-CS61A/"><span class="level-start"><span class="level-item">UCB CS61A</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-03T11:36:10.724Z">2024-09-03</time></p><p class="title"><a href="/2024/09/03/Lab%202%20Key%20Value%20Server/">Lab 2: Key/Value Server</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-02T13:42:42.121Z">2024-09-02</time></p><p class="title"><a href="/2024/09/02/Debugging/">Debugging</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-02T09:43:22.567Z">2024-09-02</time></p><p class="title"><a href="/2024/09/02/Lab%201%20MapReduce/">Lab 1: MapReduce</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-30T14:43:58.383Z">2024-08-30</time></p><p class="title"><a href="/2024/08/30/%E7%AE%80%E5%8D%95%E7%9C%8B%E4%B8%8B%20Tai-e%20%E6%BA%90%E7%A0%81/">简单看下 Tai-e 源码</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/">NJU Static Analysis</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-20T02:58:46.061Z">2024-08-20</time></p><p class="title"><a href="/2024/08/20/GAMES101%20%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/">GAMES101 课程总结</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/">GAMES101</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2024/"><span class="level-start"><span class="level-item">2024</span></span><span class="level-end"><span class="level-item tag">37</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/"><span class="level-start"><span class="level-item">2023</span></span><span class="level-end"><span class="level-item tag">95</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Debugging/"><span class="tag">Debugging</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hexo/"><span class="tag">Hexo</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://clist.by/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">CLIST</span></span><span class="level-right"><span class="level-item tag">clist.by</span></span></a></li><li><a class="level is-mobile" href="https://csdiy.wiki/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">CSDIY</span></span><span class="level-right"><span class="level-item tag">csdiy.wiki</span></span></a></li><li><a class="level is-mobile" href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">阮一峰的网络日志</span></span><span class="level-right"><span class="level-item tag">www.ruanyifeng.com</span></span></a></li></ul></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2024 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
             article: {
                 highlight: {
                     clipboard: true,

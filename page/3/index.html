@@ -29,126 +29,7 @@
       switchTab();
       window.addEventListener('hashchange', switchTab, false);
   })();
-  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/links">Links</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-08-17T15:31:02.381Z" title="2024/8/17 下午11:31:02">2024-08-17</time>发表</span><span class="level-item"><time dateTime="2024-09-02T13:48:44.379Z" title="2024/9/2 下午9:48:44">2024-09-02</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a><span> / </span><a class="link-muted" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/">NJU Static Analysis</a></span><span class="level-item">14 分钟读完 (大约2152个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2024/08/17/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%20%E8%BD%AF%E4%BB%B6%E5%88%86%E6%9E%90%20%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/">南京大学 软件分析 课程总结</a></p><div class="content"><p><a target="_blank" rel="noopener" href="https://tai-e.pascal-lab.net/lectures.html">课程网站</a>，<a target="_blank" rel="noopener" href="https://oj.pascal-lab.net/problem">在线评测</a>，<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1b7411K7P4">课程视频</a>，<a target="_blank" rel="noopener" href="https://silverbullettt.bitbucket.io/">silverbullettt</a>。</p>
-<p><strong>知难而进，贵在坚持。省察体悟，贵于改过。</strong></p>
-<h2 id="Course-Introduction">Course Introduction</h2>
-<h3 id="概念">概念</h3>
-<p>程序设计语言（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Programming_language">Programming Languages</a>，PL），静态程序分析（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Static_program_analysis">Static Program Analysis</a>），莱斯定理（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Rice%27s_theorem">Rice’s Theorem</a>），可靠性（Soundness）和完备性（Completeness）。</p>
-<p>莱斯定理说明，不存在完美的静态分析，满足 Sound（Overapproximate）和 Complete（Underapproximate）。Sound 允许误报（false positives），但不允许漏报（false negatives），Complete 相反。</p>
-<p>静态分析可以使用两个词概括：Abstraction + Safe-approximation（Transfer functions，Control flows）。首先对数据做抽象，然后对数据流做近似。近似涉及到 Transfer functions 如何设计和 Control flows 如何合并。Safe-approximation 的含义取决于使用场景，在大多数场景 Sound 就是 Safe-approximation，而小部分场景 Complete 才是。</p>
-<h3 id="问题">问题</h3>
-<p>Q：关于静态分析，思考 What、Why、How？</p>
-<p>Q：如何使用一句话概括静态分析？什么是有用的静态分析？</p>
-<p>A：在确保 Safe-approximation 的前提下，在精度（precision）和速度（speed）之间权衡。</p>
-<h3 id="参考">参考</h3>
-<p><img src="/img/PL.assets/1724311661561.png" alt=""></p>
-<p><img src="/img/PL.assets/1724208752314.png" alt=""></p>
-<h2 id="Intermediate-Representation">Intermediate Representation</h2>
-<h3 id="概念-2">概念</h3>
-<p>编译器（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Compiler#Three-stage_compiler_structure">Compiler</a>），中间表示（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Intermediate_representation">Intermediate Representation</a>，IR），三地址码（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Three-address_code">Three-Address Code</a>，3AC），控制流图（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Control-flow_graph">Control Flow Graph</a>，CFG），基本块（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Basic_block">Basic Block</a>，BB）。</p>
-<h3 id="问题-2">问题</h3>
-<p>Q：如何基于 3AC 构建 BB？如何基于 BB 构建 CFG？</p>
-<h3 id="参考-2">参考</h3>
-<p><img src="/img/PL.assets/1724312032483.png" alt=""></p>
-<p><img src="/img/PL.assets/1724488670237.png" alt=""></p>
-<h2 id="Data-Flow-Analysis-Applications">Data Flow Analysis - Applications</h2>
-<h3 id="概念-3">概念</h3>
-<p>数据流分析的种类：may analysis（over-approximation），must analysis（under-approximation）。</p>
-<p>数据流分析的应用：Reaching Definitions Analysis，Live Variables Analysis，Available Expressions Analysis。</p>
-<h3 id="问题-3">问题</h3>
-<p>Q：为什么 Reaching Definitions Analysis 的算法最终会停止？</p>
-<p>A：所有的 OUT 对应的 Bit Vector，它包含的 1 的数量都是单调递增的，最后必定会到达一个上界。</p>
-<p>Q：为什么 Live Variables Analysis 使用 Backward Analysis，而不是 Forward Analysis？（算法设计更方便）</p>
-<h3 id="参考-3">参考</h3>
-<p><img src="/img/PL.assets/1723986358497.png" alt=""></p>
-<h2 id="Data-Flow-Analysis-Foundations">Data Flow Analysis - Foundations</h2>
-<h3 id="概念-4">概念</h3>
-<p>不动点（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Fixed_point_(mathematics)">Fixed point</a>），偏序集（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Partially_ordered_set">Partially ordered set</a>），上确界和下确界（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Infimum_and_supremum">LUB and GLB</a>，<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Join_and_meet">Join and meet</a>），格（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Lattice_(order)">Lattice</a>），不动点定理（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Knaster%E2%80%93Tarski_theorem">Knaster–Tarski theorem</a>），抽象解释（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Abstract_interpretation">Abstract interpretation</a>）。</p>
-<table>
-<thead>
-<tr>
-<th>Data Flow Analysis</th>
-<th>Domain</th>
-<th>Direction</th>
-<th>May/Must</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Constant Propagation Analysis</td>
-<td>Set of pairs (variable, value)</td>
-<td>Forwards</td>
-<td>Must</td>
-</tr>
-</tbody>
-</table>
-<h3 id="问题-4">问题</h3>
-<p>Q：什么是 Meet-Over-All-Paths Solution（MOP）？MOP 和 Iterative Algorithm 的精度有什么关系？</p>
-<p>Q：为什么 Constant Propagation Analysis 的 Transfer function 是不可分配的（Non-distributivity）？</p>
-<p>Q：如何理解可能存在多个不动点，以及 Iterative Algorithm 求到的是最小/最大不动点？为什么在 Constant Propagation Analysis 中，MOP 的精度大于 Iterative Algorithm 的精度？MOP 是否满足不动点定理？</p>
-<p>A：对于函数 \(F\) 而言，可能有多个 \(x\) 使得 \(F(x)=x\)，所以可能存在多个不动点。由于 Iterative Algorithm 满足不动点定理，对于特定的函数 \(F\)，如果存在多个不动点，我们求到的必然是最小/最大不动点。MOP 和 Iterative Algorithm 的函数 \(F\) 不同，所以 MOP 的精度可以更大，不会违背不动点定理。MOP 应该是满足不动点定理的，因为 Transfer function 和 Join/Meet function 相比 Iterative Algorithm 没有变化，只是它们组成的函数 \(F\) 有变化。</p>
-<h3 id="参考-4">参考</h3>
-<p><img src="/img/PL.assets/1724169315214.png" alt=""></p>
-<p><img src="/img/PL.assets/1724495214069.png" alt=""></p>
-<h2 id="Interprocedural-Analysis">Interprocedural Analysis</h2>
-<h3 id="问题-5">问题</h3>
-<p>Q：什么是 CHA？如何基于 CHA 构建 Call Graph？</p>
-<p>Q：如何实现 Interprocedural Constant Propagation Analysis？</p>
-<h3 id="参考-5">参考</h3>
-<p><img src="/img/PL.assets/1724483598771.png" alt=""></p>
-<p><img src="/img/PL.assets/1724313108813.png" alt=""></p>
-<p><img src="/img/PL.assets/1724324324904.png" alt=""></p>
-<p><img src="/img/PL.assets/1724483641552.png" alt=""></p>
-<h2 id="Pointer-Analysis">Pointer Analysis</h2>
-<h3 id="问题-6">问题</h3>
-<p>Q：Pointer Analysis 和 Alias Analysis 的区别？</p>
-<p>A：Pointer Analysis 回答一个指针能指向哪些对象，Alias Analysis 回答两个指针是否能指向同一个对象。</p>
-<p>Q：各个 Factor 的方案该如何选择，精度和速度的权衡？</p>
-<p>A：<strong>课程选择 Allocation-site，Context-sensitive，Flow-insensitive，Whole-program。</strong></p>
-<h3 id="参考-6">参考</h3>
-<p><img src="/img/PL.assets/1724462082705.png" alt=""></p>
-<p><img src="/img/PL.assets/1724463347046.png" alt=""></p>
-<p><img src="/img/PL.assets/1724464028505.png" alt=""></p>
-<p><img src="/img/PL.assets/1724464568509.png" alt=""></p>
-<h2 id="Pointer-Analysis-Foundations">Pointer Analysis - Foundations</h2>
-<h3 id="问题-7">问题</h3>
-<p>Q：什么是 Pointer Flow Graph（PFG）？如何构建 PFG？</p>
-<p>Q：为什么构建 PFG 和在 PFG 上传播指向信息，两个过程相互依赖？以及构建 PFG 和构建 Call Graph 相互依赖？</p>
-<p>A：首先需要有 PFG，才能在 PFG 上传播指向信息。而 PFG 节点获得指向信息之后，可能会在 PFG 中添加边。主要原因是 PFG 使用抽象对象的字段 \(o_{i}.f\) 来表示实例字段 \(x.f\)，其中 \(o_{i}\in pt(x)\)，它是动态变化的。为什么不直接使用 \(x.f\) 作为节点，在最开始将所有边建好？个人理解，如果 \(x\) 和 \(y\) 的指向信息存在交集，当更新 \(x.f\) 时需要部分更新 \(y.f\)，这样很难使用图上的算法来实现 Pointer Analysis，所以需要做更细粒度的划分。构建 PFG 和构建 Call Graph 相互依赖，也是取决于 Call Rule 的设计，从而在构建 Call Graph 的过程中会在 PFG 中添加边。</p>
-<h3 id="参考-7">参考</h3>
-<p><img src="/img/PL.assets/1724481425200.png" alt=""></p>
-<p><img src="/img/PL.assets/1724491752377.png" alt=""></p>
-<p><img src="/img/PL.assets/1724568441397.png" alt=""></p>
-<p><img src="/img/PL.assets/1724504409500.png" alt=""></p>
-<p><img src="/img/PL.assets/1724568419633.png" alt=""></p>
-<p><img src="/img/PL.assets/1724548902142.png" alt=""></p>
-<h2 id="Pointer-Analysis-Context-Sensitivity">Pointer Analysis - Context Sensitivity</h2>
-<h3 id="问题-8">问题</h3>
-<p>Q：为什么 Instance fields 不需要限定上下文？</p>
-<p>A：明确限定上下文的作用是什么，区分对同一个方法的多次调用，也就是区分多次调用中的变量和对象。而对于 Instance fileds 不需要区分什么，它从属于某个对象，该对象已经被上下文限定。</p>
-<h3 id="参考-8">参考</h3>
-<p><img src="/img/PL.assets/1724635074209.png" alt=""></p>
-<p><img src="/img/PL.assets/1724640736393.png" alt=""></p>
-<p><img src="/img/PL.assets/1724640749826.png" alt=""></p>
-<p><img src="/img/PL.assets/1724640838714.png" alt=""></p>
-<p><img src="/img/PL.assets/1724656975139.png" alt=""></p>
-<h2 id="Static-Analysis-for-Security">Static Analysis for Security</h2>
-<h3 id="参考-9">参考</h3>
-<p><img src="/img/PL.assets/1724837450555.png" alt=""></p>
-<p><img src="/img/PL.assets/1724842885371.png" alt=""></p>
-<p><img src="/img/PL.assets/1724842693103.png" alt=""></p>
-<p><img src="/img/PL.assets/1724842772975.png" alt=""></p>
-<p><img src="/img/PL.assets/1724842816062.png" alt=""></p>
-<p><img src="/img/PL.assets/1724842831520.png" alt=""></p>
-<h2 id="实验作业">实验作业</h2>
-<p><img src="/img/PL.assets/1724739023009.png" alt=""></p>
-<p>如何减少和检查代码的错误？</p>
-<p>① 编写代码前：可以先使用注释梳理逻辑，确定算法步骤。重要！如果遗漏某种情况，之后找错会花费更多时间。遇到不清楚的地方要及时（使用 TODO）标出来，不要想当然。② 编写代码时：不要过早优化。在必要的地方添加断言。当找不到想要的 API 时可以查看继承关系，目标 API 可能在子类中。每完成一个功能，就编写相应的测试用例，尽早发现问题。③ 代码出错时：首先检查逻辑是否有误/遗漏，以及边界条件的处理是否有误/遗漏。然后检查 API 是否存在误用，例如对 API 的功能理解有误，或者误用其他类的相同名称的 API。最后检查文档表述是否存在歧义，或者不清楚的地方，从而在实现细节的理解上存在偏差。④ 找不到错时：如果可以的话，找到正确代码，然后对拍测试。休息一下，或许之后能找到。真的找不到，重写一遍，或许能够发现遗漏的地方。真的真的找不到，寄。</p>
-<p>Java 的 <code>ArrayDeque</code> 不能存储 <code>null</code>，而 <code>LinkedList</code> 可以。<code>Deque</code> 的文档有说明：</p>
-<blockquote>
-<p>While <code>Deque</code> implementations are not strictly required to prohibit the insertion of null elements, they are strongly encouraged to do so. Users of any <code>Deque</code> implementations that do allow null elements are strongly encouraged <em>not</em> to take advantage of the ability to insert nulls. This is so because <code>null</code> is used as a special return value by various methods to indicate that the deque is empty.</p>
-</blockquote>
-</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-08-16T11:35:55.194Z" title="2024/8/16 下午7:35:55">2024-08-16</time>发表</span><span class="level-item"><time dateTime="2024-08-19T11:07:56.041Z" title="2024/8/19 下午7:07:56">2024-08-19</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E4%B9%A6%E7%B1%8D/">书籍</a><span> / </span><a class="link-muted" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/">CSAPP/OSTEP</a></span><span class="level-item">21 分钟读完 (大约3085个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2024/08/16/CSAPP%20%E7%AC%AC%206%20%E7%AB%A0%20+%20OSTEP%20%E6%8C%81%E4%B9%85%E6%80%A7/">CSAPP 第 6 章 + OSTEP 持久性</a></p><div class="content"><h2 id="存储技术">存储技术</h2>
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/links">Links</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-08-16T11:35:55.194Z" title="2024/8/16 下午7:35:55">2024-08-16</time>发表</span><span class="level-item"><time dateTime="2024-08-19T11:07:56.041Z" title="2024/8/19 下午7:07:56">2024-08-19</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E4%B9%A6%E7%B1%8D/">书籍</a><span> / </span><a class="link-muted" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/">CSAPP/OSTEP</a></span><span class="level-item">21 分钟读完 (大约3085个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2024/08/16/CSAPP%20%E7%AC%AC%206%20%E7%AB%A0%20+%20OSTEP%20%E6%8C%81%E4%B9%85%E6%80%A7/">CSAPP 第 6 章 + OSTEP 持久性</a></p><div class="content"><h2 id="存储技术">存储技术</h2>
 <h3 id="随机访问存储器">随机访问存储器</h3>
 <p>随机访问存储器（Random-Access Memory，RAM）分为两类：静态的和动态的。静态 RAM（SRAM）比动态 RAM（DRAM）更快，但也更贵。SRAM 通常用来作为高速缓存存储器，DRAM 通常用来作为主存以及图形系统的帧缓冲区。</p>
 <h3 id="静态-RAM">静态 RAM</h3>
@@ -191,7 +72,247 @@
 <h3 id="组织结构">组织结构</h3>
 <p>考虑一个计算机系统，其中每个存储器地址有 \(m\) 位，形成 \(M=2^{m}\) 个不同的地址。如图 6-25a 所示，这样一个机器的高速缓存被组织成一个有 \(S=2^{s}\) 个高速缓存组（cache set）的数组。每个组包含 \(E\) 个高速缓存行（cache line）。每个行是由一个 \(B=2^{b}\) 字节的数据块（block）组成的，一个有效位（valid bit）指明这个行是否包含有意义的信息，还有 \(t=m-(b+s)\) 个标记位（tag bit）（是当前块的内存地址的位的一个子集），它们唯一地标识存储在这个高速缓存行中的块。</p>
 <p><img src="/img/System.assets/1723027569074.png" alt=""></p>
-</div></article></div><nav class="pagination" role="navigation" aria-label="pagination"><div class="pagination-previous"><a href="/page/2/">上一页</a></div><div class="pagination-next"><a href="/page/4/">下一页</a></div><ul class="pagination-list is-hidden-mobile"><li><a class="pagination-link" href="/">1</a></li><li><a class="pagination-link" href="/page/2/">2</a></li><li><a class="pagination-link is-current" href="/page/3/">3</a></li><li><a class="pagination-link" href="/page/4/">4</a></li><li><span class="pagination-ellipsis">&hellip;</span></li><li><a class="pagination-link" href="/page/66/">66</a></li></ul></nav></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/dark_souls.jpg" alt="Ligh0x74"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">Ligh0x74</p><p class="is-size-6 is-block">Developer</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Earth, Solar System</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">131</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">23</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">2</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/Ligh0x74" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Ligh0x74"><i class="fab fa-github"></i></a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://ppoffice.github.io/hexo-theme-icarus/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">ICARUS</span></span><span class="level-right"><span class="level-item tag">ppoffice.github.io</span></span></a></li><li><a class="level is-mobile" href="https://waline.js.org" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Waline</span></span><span class="level-right"><span class="level-item tag">waline.js.org</span></span></a></li><li><a class="level is-mobile" href="https://vercel.com" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Vercel</span></span><span class="level-right"><span class="level-item tag">vercel.com</span></span></a></li></ul></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/"><span class="level-start"><span class="level-item">书籍</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/"><span class="level-start"><span class="level-item">CSAPP/OSTEP</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/DDIA/"><span class="level-start"><span class="level-item">DDIA</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">基础</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E6%A8%A1%E6%9D%BF/"><span class="level-start"><span class="level-item">模板</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/OceanBase/"><span class="level-start"><span class="level-item">OceanBase</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/"><span class="level-start"><span class="level-item">算法</span></span><span class="level-end"><span class="level-item tag">88</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/AtCoder/"><span class="level-start"><span class="level-item">AtCoder</span></span><span class="level-end"><span class="level-item tag">16</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/Codeforces/"><span class="level-start"><span class="level-item">Codeforces</span></span><span class="level-end"><span class="level-item tag">34</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/LeetCode/"><span class="level-start"><span class="level-item">LeetCode</span></span><span class="level-end"><span class="level-item tag">38</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><span class="level-start"><span class="level-item">设计模式</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">3</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/C/"><span class="level-start"><span class="level-item">C++</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Java/"><span class="level-start"><span class="level-item">Java</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/"><span class="level-start"><span class="level-item">课程</span></span><span class="level-end"><span class="level-item tag">23</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/"><span class="level-start"><span class="level-item">CMU 15-445</span></span><span class="level-end"><span class="level-item tag">7</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/"><span class="level-start"><span class="level-item">GAMES101</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/"><span class="level-start"><span class="level-item">MIT 6.824</span></span><span class="level-end"><span class="level-item tag">10</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-ICS-OS/"><span class="level-start"><span class="level-item">NJU ICS/OS</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/"><span class="level-start"><span class="level-item">NJU Static Analysis</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/UCB-CS61A/"><span class="level-start"><span class="level-item">UCB CS61A</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-02T13:42:42.121Z">2024-09-02</time></p><p class="title"><a href="/2024/09/02/Debugging/">Debugging</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-02T09:43:22.567Z">2024-09-02</time></p><p class="title"><a href="/2024/09/02/Lab%201%20MapReduce/">Lab 1: MapReduce</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-30T14:43:58.383Z">2024-08-30</time></p><p class="title"><a href="/2024/08/30/%E7%AE%80%E5%8D%95%E7%9C%8B%E4%B8%8B%20Tai-e%20%E6%BA%90%E7%A0%81/">简单看下 Tai-e 源码</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/">NJU Static Analysis</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-20T02:58:46.061Z">2024-08-20</time></p><p class="title"><a href="/2024/08/20/GAMES101%20%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/">GAMES101 课程总结</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/">GAMES101</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-17T15:31:02.381Z">2024-08-17</time></p><p class="title"><a href="/2024/08/17/%E5%8D%97%E4%BA%AC%E5%A4%A7%E5%AD%A6%20%E8%BD%AF%E4%BB%B6%E5%88%86%E6%9E%90%20%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/">南京大学 软件分析 课程总结</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/">NJU Static Analysis</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2024/"><span class="level-start"><span class="level-item">2024</span></span><span class="level-end"><span class="level-item tag">36</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/"><span class="level-start"><span class="level-item">2023</span></span><span class="level-end"><span class="level-item tag">95</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Debugging/"><span class="tag">Debugging</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hexo/"><span class="tag">Hexo</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://clist.by/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">CLIST</span></span><span class="level-right"><span class="level-item tag">clist.by</span></span></a></li><li><a class="level is-mobile" href="https://csdiy.wiki/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">CSDIY</span></span><span class="level-right"><span class="level-item tag">csdiy.wiki</span></span></a></li><li><a class="level is-mobile" href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">阮一峰的网络日志</span></span><span class="level-right"><span class="level-item tag">www.ruanyifeng.com</span></span></a></li></ul></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2024 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-08-16T10:12:43.657Z" title="2024/8/16 下午6:12:43">2024-08-16</time>发表</span><span class="level-item"><time dateTime="2024-08-19T11:07:56.011Z" title="2024/8/19 下午7:07:56">2024-08-19</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E4%B9%A6%E7%B1%8D/">书籍</a><span> / </span><a class="link-muted" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/">CSAPP/OSTEP</a></span><span class="level-item">1 小时读完 (大约7417个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2024/08/16/CSAPP%20%E7%AC%AC%208%20&amp;%209%20%E7%AB%A0%20+%20OSTEP%20%E8%99%9A%E6%8B%9F%E5%8C%96/">CSAPP 第 8 &amp; 9 章 + OSTEP 虚拟化</a></p><div class="content"><h2 id="异常控制流-CPU-虚拟化">异常控制流 + CPU 虚拟化</h2>
+<p>从给处理器加电开始，直到你断电为止，程序计数器假设一个值的序列 \(a_{0},a_{1},\cdots,a_{n-1}\) 其中，每个 \(a_{k}\) 是某个相应的指令 \(I_{k}\) 的地址。每次从 \(a_{k}\) 到 \(a_{k+1}\) 的过渡称为<strong>控制转移</strong>（control transfer）。这样的控制转移序列叫做处理器的<strong>控制流</strong>（flow of control，control flow）。</p>
+<p>最简单的一种控制流是一个“平滑的”序列，其中每个 \(I_{k}\) 和 \(I_{k+1}\) 在内存中都是相邻的。这种平滑流的突变（也就是 \(I_{k+1}\) 与 \(I_{k}\) 不相邻）通常是由诸如跳转、调用和返回这样一些熟悉的程序指令造成的。这样一些指令都是必要的机制，使得程序能够对由程序变量表示的内部程序状态中的变化做出反应。</p>
+<p>但是系统也必须能够对系统状态的变化做出反应，这些系统状态不是被内部程序变量捕获的，而且也不一定要和程序的执行相关。比如，一个硬件定时器定期产生信号，这个事件必须得到处理。包到达网络适配器后，必须存放在内存中。程序向磁盘请求数据，然后休眠，直到被通知说数据已就绪。当子进程终止时，创造这些子进程的父进程必须得到通知。</p>
+<p>现代系统通过使控制流发生突变来对这些情况做出反应。一般而言，我们把这些突变称为<strong>异常控制流</strong>（Exceptional Control Flow，ECF）。异常控制流发生在计算机系统的各个层次。比如，在硬件层，硬件检测到的事件会触发控制突然转移到异常处理程序。在操作系统层，内核通过上下文切换将控制从一个用户进程转移到另一个用户进程。在应用层，一个进程可以发送信号到另一个进程，而接收者会将控制突然转移到它的一个信号处理程序。一个程序可以通过回避通常的栈规则，并执行到其他函数中任意位置的非本地跳转来对错误做出反应。</p>
+<h3 id="异常">异常</h3>
+<p>异常是异常控制流的一种形式，它一部分由硬件实现，一部分由操作系统实现。因为它们有一部分是由硬件实现的，所以具体细节将随系统的不同而有所不同。然而，对于每个系统而言，基本的思想都是相同的。</p>
+<p><strong>异常</strong>（exception）就是控制流中的突变，用来响应处理器状态中的某些变化。图 8-1 展示了基本的思想。在图中，当处理器状态中发生一个重要的变化时，处理器正在执行某个当前指令 \(I_{curr}\)。在处理器中，状态被编码为不同的位和信号。状态变化称为<strong>事件</strong>（event）。事件可能和当前指令的执行直接相关。比如，发生虚拟内存缺页、算术溢出，或者一条指令试图除以零。另一方面，事件也可能和当前指令的执行没有关系。比如，一个系统定时器产生信号或者一个 I/O 请求完成。</p>
+<p><img src="/img/System.assets/1723078899085.png" alt=""></p>
+<p>在任何情况下，当处理器检测到有事件发生时，它就会通过一张叫做<strong>异常表</strong>（exception table）的跳转表，进行一个间接过程调用（异常），到一个专门设计用来处理这类事件的<strong>异常处理程序</strong>（exception handler）。当异常处理程序完成处理后，根据引起异常的事件的类型，会发生以下 3 种情况中的一种：</p>
+<ul>
+<li>处理程序将控制返回给当前指令 \(I_{curr}\)，即当事件发生时正在执行的指令。</li>
+<li>处理程序将控制返回给 \(I_{next}\)，如果没有发生异常将会执行的下一条指令。</li>
+<li>处理程序终止被中断的程序。</li>
+</ul>
+<h3 id="异常处理">异常处理</h3>
+<p>系统中可能的每种类型的异常都分配了一个唯一的非负整数的<strong>异常号</strong>（exception number）。其中一些号码是由处理器的设计者分配的，其他号码是由操作系统内核（操作系统常驻内存的部分）的设计者分配的。前者的示例包括被零除、缺页、内存访问违例、断点以及算术运算溢出。后者的示例包括系统调用和来自外部 I/O 设备的信号。</p>
+<p><img src="/img/System.assets/1723079742524.png" alt=""></p>
+<p>在系统启动时（当计算机重启或者加电时），操作系统分配和初始化一张称为异常表的跳转表，使得表目 k 包含异常 k 的处理程序的地址。图 8-2 展示了异常表的格式。在运行时（当系统在执行某个程序时），处理器检测到发生了一个事件，并且确定了相应的异常号。随后，处理器触发异常，方法是执行间接过程调用，通过异常表的表目 k，转到相应的处理程序。图 8-3 展示了处理器如何使用异常表来形成适当的异常处理程序的地址。异常号是到异常表中的索引，异常表的起始地址放在一个叫做<strong>异常表基址寄存器</strong>（exception table base register）的特殊 CPU 寄存器里。</p>
+<p><img src="/img/System.assets/1723079814153.png" alt=""></p>
+<h3 id="异常分类">异常分类</h3>
+<h4 id="中断">中断</h4>
+<p>中断是异步发生的，是来自处理器外部的 I/O 设备的信号的结果。硬件中断不是由任何一条专门的指令造成的，从这个意义上来说它是异步的。硬件中断的异常处理程序常常称为<strong>中断处理程序</strong>（interrupt handler）。</p>
+<h4 id="陷阱">陷阱</h4>
+<p>陷阱是有意的异常，是执行一条指令的结果。就像中断处理程序一样，陷阱处理程序将控制返回到下一条指令。陷阱最重要的用途是在用户程序和内核之间提供一个像过程一样的接口，叫做<strong>系统调用</strong>。</p>
+<p><img src="/img/System.assets/1723079926034.png" alt=""></p>
+<h4 id="故障">故障</h4>
+<p>故障由错误情况引起，它可能能够被故障处理程序修正。当故障发生时，处理器将控制转移给故障处理程序。如果处理程序能够修正这个错误情况，它就将控制返回到引起故障的指令，从而重新执行它。否则，处理程序返回到内核中的 abort 例程，abort 例程会终止引起故障的应用程序。例如：缺页异常。</p>
+<h4 id="终止">终止</h4>
+<p>终止是不可恢复的致命错误造成的结果，通常是一些硬件错误，比如 DRAM 或者 SRAM 位被损坏时发生的奇偶错误。终止处理程序从不将控制返回给应用程序。处理程序将控制返回给一个 abort 例程，该例程会终止这个应用程序。</p>
+<h3 id="进程">进程</h3>
+<p>进程就是运行中的程序。最简单的方式是一次只运行一个进程，等到它运行完成之后再运行下一个。但是，通常人们希望同时运行多个进程。解决方案是，使用<strong>时分共享</strong> CPU 技术，并发地运行多个进程。要高效、可控的实现时分共享，需要使用操作系统来对进程进行管理，而操作系统进行管理的基础就是需要始终保留对 CPU 的控制权。如果没有控制权，进程可以无限制的使用 CPU，访问任意地址。使用异常机制结合用户/内核模式，使得 CPU 的控制权总会在特定的情况从进程转移给操作系统，从而能够高效、可控的实现时分共享。</p>
+<p><img src="/img/System.assets/1723116572555.png" alt=""></p>
+<h4 id="创建进程">创建进程</h4>
+<p>要运行可执行目标文件 <code>prog</code>，我们可以在 Linux shell 的命令行中输入它的名字 <code>./prog</code>。因为 prog 不是一个内置的 shell 命令，所以 shell 会认为 <code>prog</code> 是一个可执行目标文件，shell 进程会生成一个子进程，它是父进程的一个复制。子进程通过 <code>execve</code> 系统调用启动加载器。加载器删除子进程现有的虚拟内存段，并创建一组新的代码、数据、堆和栈段。新的栈和堆段被初始化为零。通过将虚拟地址空间中的页映射到可执行文件的页大小的片（chunk），新的代码和数据段被初始化为可执行文件的内容。</p>
+<p>最后，加载器跳转到程序的入口点，也就是 <code>_start</code> 函数的地址。这个函数是在系统目标文件 <code>ctrl.o</code> 中定义的，对所有的 C 程序都是一样的。<code>_start</code> 函数调用系统启动函数 <code>__libc_start_main</code>，该函数定义在 <code>libc.so</code> 中。它初始化执行环境，调用用户层的 <code>main</code> 函数，处理 <code>main</code> 函数的返回值，并且在需要的时候把控制返回给内核。</p>
+<p>除了一些头部信息，在加载过程中没有任何从磁盘到内存的数据复制，直到 CPU 引用一个被映射的虚拟页时才会进行复制。此时，操作系统利用它的页面调度机制自动将页面从磁盘传送到内存。</p>
+<p><img src="/img/System.assets/1723796604826.png" alt=""></p>
+<p>Linux 系统中的每个程序都运行在一个进程上下文中，有自己的虚拟地址空间。在 Linux x86-64 系统中，代码段总是从地址 0×400000 处开始，后面是数据段。运行时堆在数据段之后，通过调用 malloc 库往上增长。堆后面的区域是为共享模块保留的。用户栈总是从最大的合法用户地址（\(2^{48}-1\)）开始，向较小内存地址增长。栈上的区域，从地址 \(2^{48}\) 开始，是为内核（kernel）中的代码和数据保留的，所谓内核就是操作系统驻留在内存的部分。</p>
+<p>上图只是简化图。实际上，由于<code>.data</code> 段有对齐要求，所以代码段和数据段之间是有间隙的。同时，在分配栈、共享库和堆段运行时地址的时候，链接器还会使用地址空间布局随机化（ASLR）。虽然每次程序运行时这些区域的地址都会改变，但它们的相对位置是不变的。</p>
+<h4 id="用户模式和内核模式">用户模式和内核模式</h4>
+<p>为了使操作系统内核提供一个无懈可击的进程抽象，处理器必须提供一种机制，限制一个应用可以执行的指令以及它可以访问的地址空间范围。</p>
+<p>处理器通常是用某个控制寄存器中的一个<strong>模式位</strong>（mode bit）来提供这种功能的，该寄存器描述了进程当前享有的特权。当设置了模式位时，进程就运行在<strong>内核模式</strong>中（有时叫做超级用户模式）。一个运行在内核模式的进程可以执行指令集中的任何指令，并且可以访问系统中的任何内存位置。</p>
+<p>没有设置模式位时，进程就运行在<strong>用户模式</strong>中。用户模式中的进程不允许执行<strong>特权指令</strong>（privileged instruction），比如停止处理器、改变模式位，或者发起一个 I/O 操作。也不允许用户模式中的进程直接引用地址空间中内核区内的代码和数据。任何这样的尝试都会导致致命的保护故障。反之，用户程序必须通过系统调用接口间接地访问内核代码和数据。</p>
+<p>运行应用程序代码的进程初始时是在用户模式中的。进程从用户模式变为内核模式的唯一方法是通过诸如中断、故障或者陷入系统调用这样的异常。当异常发生时，控制传递到异常处理程序，处理器将模式从用户模式变为内核模式。处理程序运行在内核模式中，当它返回到应用程序代码时，处理器就把模式从内核模式改回到用户模式。</p>
+<h4 id="上下文切换">上下文切换</h4>
+<p>内核为每个进程维持一个<strong>上下文</strong>（context），上下文就是内核重新启动一个被抢占的进程所需的状态。包括通用目的寄存器、浮点寄存器、程序计数器、用户栈、状态寄存器、内核栈和各种内核数据结构，比如描述地址空间的页表、包含有关当前进程信息的进程表，以及包含进程已打开文件的信息的文件表。</p>
+<p>操作系统内核使用一种称为<strong>上下文切换</strong>（context switch）的较高层形式的异常控制流来实现多任务。上下文切换机制是建立在较低层异常机制之上的。在进程执行的某些时刻，内核可以决定抢占当前进程，并使用上下文切换来将控制转移到新的进程。这种决策就叫做<strong>调度</strong>（scheduling），是由内核中称为<strong>调度器</strong>（scheduler）的代码处理的。上下文切换的步骤：① 保存当前进程的上下文，② 恢复某个先前被抢占的进程被保存的上下文，③ 将控制传递给这个新恢复的进程。</p>
+<p><img src="/img/System.assets/1723083860508.png" alt=""></p>
+<p>图 8-14 展示了一对进程 A 和 B 之间上下文切换的示例。在这个例子中，进程 A 初始运行在用户模式中，直到它通过执行系统调用 read 陷入到内核。内核中的陷阱处理程序请求来自磁盘控制器的 DMA 传输，并且安排在磁盘控制器完成从磁盘到内存的数据传输后，磁盘中断处理器。</p>
+<h4 id="调度策略">调度策略</h4>
+<p>调度指标：</p>
+<ul>
+<li>周转时间：\(T_{周转时间}=T_{完成时间}-T_{到达时间}\)。（性能指标）</li>
+<li>响应时间：\(T_{响应时间}=T_{首次运行}-T_{到达时间}\)。（公平指标）</li>
+</ul>
+<p>护航效应（convoy effect），一些耗时较少的潜在资源消费者被排在重量级的资源消费者之后，使得平均周转时间增大。</p>
+<p>如果你愿意不公平，你可以运行较短的工作直到完成，但是要以响应时间为代价。如果你重视公平性，则响应时间会较短，但会以周转时间为代价。</p>
+<p><strong>先进先出（FIFO）</strong></p>
+<p><img src="/img/System.assets/1723117226126.png" alt=""></p>
+<p><strong>最短任务优先（SJF）</strong></p>
+<p><img src="/img/System.assets/1723117380374.png" alt=""></p>
+<p><strong>最短完成时间优先（STCF）</strong></p>
+<p><img src="/img/System.assets/1723117603293.png" alt=""></p>
+<p><strong>时间片轮转（RR）</strong></p>
+<p>时间片越短响应时间越好，但是时间片太短会导致频繁的上下文切换，从而影响系统的整体性能。因此，系统设计者需要权衡时间片的长度，使其足够长，以便摊销（amortize）上下文切换成本，而又不会使系统不及时响应。</p>
+<p><img src="/img/System.assets/1723117916771.png" alt=""></p>
+<p>请注意，上下文切换的成本不仅仅来自保存和恢复少量寄存器的操作系统操作。程序运行时，它们在 CPU 高速缓存、TLB、分支预测器和其他片上硬件中建立了大量的状态。切换到另一个工作会导致此状态被刷新，且与当前运行的作业相关的新状态被引入，这可能导致显著的性能成本。</p>
+<p><strong>多级反馈队列（MLFQ）</strong></p>
+<p>关键问题：没有工作长度的先验（priori）知识，如何设计一个能同时减少响应时间和周转时间的调度程序？</p>
+<p>MLFQ 中有许多独立的队列（queue），每个队列有不同的优先级（priority level）。任何时刻，一个工作只能存在于一个队列中。MLFQ 总是优先执行较高优先级的工作（即在较高级队列中的工作）。当然，每个队列中可能会有多个工作，因此具有同样的优先级。在这种情沉下，我们就对这些工作采用轮转调度。</p>
+<p>因此，MLFQ 调度策略的关键在于如何设置优先级。MLFQ 没有为每个工作指定不变的优先顺序，而是根据观察到的行为调整它的优先级。例如，如果一个工作不断放弃 CPU 去等待键盘输入，这是交互型进程的可能行为，MLFQ 因此会让它保持高优先级。相反，如果一个工作长时间地占用 CPU，MLFQ 会降低其优先级。通过这种方式，MLFQ 在进程运行过程中学习其行为，从而利用工作的历史来预测它未来的行为。</p>
+<ul>
+<li>规则 1：如果 A 的优先级 &gt; B 的优先级，运行 A（不运行 B）。</li>
+<li>规则 2：如果 A 的优先级 = B 的优先级，轮转运行 A 和 B。</li>
+<li>规则 3：工作进入系统时，放在最高优先级（最上层队列）。</li>
+<li>规则 4：一旦工作用完其在某一层中的时间配额（无论中间主动放弃了多少次 CPU），就降低其优先级（移入低一级队列）。</li>
+<li>规则 5：经过一段时间 \(S\)，就将系统中所有工作重新加入最高优先级队列。</li>
+</ul>
+<p>关于 MLFQ 调度算法还有一些问题，其中一个大问题是如何配置一个调度程序。例如：配置多少队列？每一层队列的时间片配置多大？为了避免饥饿问题以及进程行为改变，应该多久提升一次进程的优先级？这些问题都没有显而易见的答案，因此只有利用对工作负载的经验，以及后续对调度程序的调优，才会导致令人满意的平衡。</p>
+<h2 id="虚拟内存-内存虚拟化">虚拟内存 + 内存虚拟化</h2>
+<p>从内存层面来说，实现时分共享最简单的方式是，进程独占内存的使用，切换时将其保存到磁盘中，然后加载另一个进程。为了提高效率，我们让多个进程同时使用内存，但是如何实现进程内存之间的隔离呢？所以引入虚拟内存的概念，让操作系统管理内存实现虚拟化。</p>
+<h3 id="虚拟寻址">虚拟寻址</h3>
+<p>计算机系统的主存被组织成一个由 M 个连续的字节大小的单元组成的数组。每字节都有一个唯一的<strong>物理地址</strong>（Physical Address，PA）。使用虚拟寻址时，CPU 通过生成一个<strong>虚拟地址</strong>（Virtual Address，VA）来访问主存。之后 CPU 上被称为<strong>内存管理单元</strong>（Memory Management Unit，MMU）的专用硬件，利用存放在主存中的查询表来动态的将虚拟地址翻译为物理地址，该表的内容由操作系统管理。</p>
+<p><img src="/img/System.assets/1723089151589.png" alt=""></p>
+<h3 id="页面缓存">页面缓存</h3>
+<p>概念上而言，虚拟内存被组织为一个由存放在磁盘上的 N 个连续的字节大小的单元组成的数组。每字节都有一个唯一的虚拟地址，作为到数组的索引。VM 系统通过将虚拟内存分割为固定大小的<strong>虚拟页</strong>（Virtual Page，VP），每个虚拟页的大小为 \(P=2^{p}\) 字节。类似地，物理内存被分割为<strong>物理页</strong>（Physical Page，PP），大小也为 \(P\) 字节。</p>
+<p>虚拟页面的集合被分为三个不相交的子集：</p>
+<ul>
+<li>
+<p>未分配的：VM 系统还未分配（或者创建）的页。未分配的块没有任何数据和它们相关联，因此也就不占用任何磁盘空间。</p>
+</li>
+<li>
+<p>已缓存的：已缓存在物理内存中的已分配页。</p>
+</li>
+<li>
+<p>未缓存的：未缓存在物理内存中的已分配页。</p>
+</li>
+</ul>
+<p><img src="/img/System.assets/1723090092259.png" alt=""></p>
+<p>图 9-3 的示例展示了一个有 8 个虚拟页的小虚拟内存。虚拟页 0 和 3 还没有被分配，因此在磁盘上还不存在。虚拟页 1、4 和 6 被缓存在物理内存中。页 2、5 和 7 已被分配，但是当前并未缓存在主存中。</p>
+<h4 id="页表">页表</h4>
+<p>同任何缓存一样，虚拟内存系统必须有某种方法来判定一个虚拟页是否缓存在 DRAM 中的某个地方。如果是，系统还必须确定这个虚拟页存放在哪个物理页中。如果不命中，系统必须判断这个虚拟页存放在磁盘的哪个位置，在物理内存中选择一个牺牲页，并将虚拟页从磁盘复制到 DRAM 中，替换这个牺牲页。</p>
+<p>这些功能是由软硬件联合提供的，包括操作系统软件、MMU（内存管理单元）中的地址翻译硬件和存放在物理内存中被称为<strong>页表</strong>（page table）的数据结构，页表将虚拟页映射到物理页。每次地址翻译硬件将一个虚拟地址转换为物理地址时，都会读取页表。操作系统负责维护页表的内容，以及在磁盘与 DRAM 之间来回传送页。</p>
+<p><img src="/img/System.assets/1723098406460.png" alt=""></p>
+<p>图 9-4 展示了一个页表的基本组织结构。页表就是一个页表条目（Page Table Entry，PTE）的数组。虚拟地址空间中的每个页在页表中一个固定偏移量处都有一个 PTE。目前，我们将假设每个 PTE 是由一个有效位（valid bit）和一个 n 位地址字段组成的。有效位表明该虚拟页当前是否被缓存在 DRAM 中。如果设置了有效位，那么地址字段就表示 DRAM 中相应的物理页的起始位置，这个物理页中缓存了该虚拟页。如果没有设置有效位，那么一个 null 地址表示这个虚拟页还未被分配，否则这个地址就指向该虚拟页在磁盘上的起始位置（即已分配但未缓存）。</p>
+<h4 id="缺页">缺页</h4>
+<p><img src="/img/System.assets/1723103059482.png" alt=""></p>
+<p>在虚拟内存的习惯说法中，DRAM 缓存不命中称为<strong>缺页</strong>（page fault）。图 9-6 展示了在缺页之前我们的示例页表的状态。CPU 引用了 VP3 中的一个字，VP3 并未缓存在 DRAM 中。地址翻译硬件将虚拟地址作为索引来定位 PTE3，并从内存中读取它。从有效位推断出 VP3 未被缓存，从而触发一个缺页异常。缺页异常调用内核中的缺页异常处理程序，该程序会选择一个牺牲页，在此例中就是存放在 PP3 中的 VP4。如果 VP4 已被修改，那么内核会将它复制回磁盘。无论哪种情况，内核都会修改 VP4 的页表条目，反映出 VP4 不再缓存在主存中这一事实。</p>
+<p><img src="/img/System.assets/1723099103451.png" alt=""></p>
+<p>之后，内核从磁盘复制 VP3 到内存中的 PP3，更新 PTE3，随后返回。当异常处理程序返回时，它会重新启动导致缺页的指令，该指令会把导致缺页的虚拟地址重发送到地址翻译硬件。但是现在，VP3 已被缓存在主存中，那么页命中也能由地址翻译硬件正常处理。图 9-7 展示了在缺页之后我们的示例页表的状态。</p>
+<p><img src="/img/System.assets/1723099598262.png" alt=""></p>
+<h3 id="内存管理">内存管理</h3>
+<p>到目前为止，我们都假设有一个单独的页表，将一个虚拟地址空间映射到物理地址空间。实际上，操作系统为每个进程提供了一个独立的页表，因而也就是一个独立的虚拟地址空间。图 9-9 展示了基本思想。注意，多个虚拟页面可以映射到同一个物理页面上（页面共享）。</p>
+<p><img src="/img/System.assets/1723100192553.png" alt=""></p>
+<h3 id="内存保护">内存保护</h3>
+<p>任何现代计算机系统必须为操作系统提供手段来控制对内存系统的访问。不应该允许一个用户进程修改它的只读代码段。而且也不应该允许它读或修改任何内核中的代码和数据结构。不应该允许它读或者写其他进程的私有内存，并且不允许它修改任何与其他进程共享的虚拟页面，除非所有的共享者都显式地允许它这么做（通过调用明确的进程间通信系统调用）。</p>
+<p><img src="/img/System.assets/1723101059965.png" alt=""></p>
+<p>每次 CPU 生成一个虚拟地址时，地址翻译硬件都会读一个 PTE，所以可以在 PTE 上添加一些额外的许可位来控制对一个虚拟页面内容的访问。图 9-10 展示了基本思想。在这个示例中，每个 PTE 中添加了三个许可位。SUP 位表示进程是否必须运行在内核（超级用户）模式下才能访问该页。READ 位和 WRITE 位控制对页面的读写访问。如果一条指令违反了这些许可条件，那么 CPU 就触发一个一般保护故障，将控制传递给一个内核中的异常处理程序。Linux shell 一般将这种异常报告为“段错误（segmentation fault）”。</p>
+<h3 id="地址翻译">地址翻译</h3>
+<p>CPU 中的一个控制寄存器，页表基址寄存器（Page Table Base Register，PTBR）指向当前页表。\(n\) 位的虚拟地址包含两个部分：一个 \(p\) 位的虚拟页面偏移（Virtual Page Offset，VPO）和一个 \((n - p)\) 位的虚拟页号（Virtual Page Number，VPN）。MMU 利用 VPN 来选择适当的 PTE。将页表条目中物理页号（Physical Page Number，PPN）和虚拟地址中的 VPO 串联起来，就得到相应的物理地址。</p>
+<p><img src="/img/System.assets/1723102631207.png" alt=""></p>
+<h4 id="快表">快表</h4>
+<p>每次 CPU 产生一个虚拟地址，MMU 就必须查阅一个 PTE，以便将虚拟地址翻译为物理地址。在最糟糕的情况下，这会要求从内存多取一次数据，代价是几十到几百个周期。如果 PTE 碰巧缓存在 L1 中，那么开销就下降到 1 个或 2 个周期。然而，许多系统都试图消除即使是这样的开销，它们在 MMU 中包括了一个关于 PTE 的小缓存，称为快表（Translation Lookaside Buffer，TLB）。</p>
+<p><img src="/img/System.assets/1723103916101.png" alt=""></p>
+<h4 id="多级页表">多级页表</h4>
+<p>到目前为止，我们一直假设系统只用一个单独的页表来进行地址翻译。但是如果我们有一个 32 位的地址空间、4KB 的页面和一个 4 字节的 PTE，那么即使应用所引用的只是虚拟地址空间中很小的一部分，也总是需要一个 4MB 的页表驻留在内存中。对于地址空间为 64 位的系统来说，问题将变得更复杂。使用多级页表，时间换空间。</p>
+<p><img src="/img/System.assets/1723104790652.png" alt=""></p>
+</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2024-08-16T07:50:07.806Z" title="2024/8/16 下午3:50:07">2024-08-16</time>发表</span><span class="level-item"><time dateTime="2024-08-19T11:07:56.051Z" title="2024/8/19 下午7:07:56">2024-08-19</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E4%B9%A6%E7%B1%8D/">书籍</a><span> / </span><a class="link-muted" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/">CSAPP/OSTEP</a></span><span class="level-item">14 分钟读完 (大约2103个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2024/08/16/CSAPP%20%E7%AC%AC%201%20&amp;%202%20%E7%AB%A0/">CSAPP 第 1 &amp; 2 章</a></p><div class="content"><h2 id="系统概述">系统概述</h2>
+<h3 id="编译系统">编译系统</h3>
+<p><img src="/img/System.assets/1723106784635.png" alt=""></p>
+<h3 id="系统硬件">系统硬件</h3>
+<p><img src="/img/System.assets/1723793936587.png" alt=""></p>
+<h3 id="系统抽象">系统抽象</h3>
+<p><img src="/img/System.assets/1723107838196.png" alt=""></p>
+<h2 id="信息存储">信息存储</h2>
+<h3 id="基本概念">基本概念</h3>
+<p>大多数计算机使用 8 位的块，或者<strong>字节</strong>（byte），作为最小的可寻址的内存单位，而不是访问内存中单独的位。机器级程序将内存视为一个非常大的字节数组，称为<strong>虚拟内存</strong>（virtual memory）。内存的每个字节都由一个唯一的数字来标识，称为它的<strong>地址</strong>（address），所有可能地址的集合就称为<strong>虚拟地址空间</strong>（virtual address space）。</p>
+<p>每台计算机都有一个<strong>字长</strong>（word size），指明指针数据的<strong>标称大小</strong>（nominal size）。因为虚拟地址是以这样的一个字来编码的，所以字长决定的最重要的系统参数就是虚拟地址空间的最大大小。也就是说，对于一个字长为 \(w\) 位的机器而言，虚拟地址的范围为 0 ~ \(2^{w}\)-1，程序最多访问 \(2^{w}\) 个字节。</p>
+<p>我们将程序称为“32 位程序”或“64 位程序”时，区别在于该程序是如何编译的，而不是其运行的机器类型。</p>
+<h3 id="字节顺序">字节顺序</h3>
+<p>对于跨越多字节的程序对象，我们必须建立两个规则：这个对象的地址是什么，以及在内存中如何排列这些字节。</p>
+<p>在几乎所有的机器上，多字节对象都被存储为连续的字节序列，对象的地址为所使用字节中最小的地址。例如，假设一个类型为 int 的变量 × 的地址为 0x100，也就是说，地址表达式 &amp;× 的值为 0x100。那么，（假设数据类型 int 为 32 位表示）x 的 4 个字节将被存储在内存的 0x100、0x101、0x102 和 0x103 位置。</p>
+<p>在内存中按照从最低有效字节到最高有效字节的顺序存储对象的方式，称为<strong>小端法</strong>（little endian）。按照从最高有效字节到最低有效字节的顺序存储对象的方式，称为<strong>大端法</strong>（big endian）。假设变量 x 的类型为 int，位于地址 0x100 处，它的十六进制值为 0x01234567。地址范围 0x100 ~ 0x103 的字节顺序依赖于机器的类型：</p>
+<p><img src="/img/System.assets/1722937251924.png" alt=""></p>
+<h2 id="整数表示">整数表示</h2>
+<h3 id="编码方式">编码方式</h3>
+<p>对向量 \(\vec{x}=[x_{w-1},x_{w-2},\cdots,x_{0}]\)，各编码方式的定义如下：</p>
+<table>
+<thead>
+<tr>
+<th>编码方式</th>
+<th>定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无符号数</td>
+<td>\(B2U_{w}(\vec{x})\dot =\sum_{i=0}^{w-1}x_{i}2^{i}\)</td>
+</tr>
+<tr>
+<td>补码</td>
+<td>\(B2T_{w}(\vec{x})\dot =-x_{w-1}2^{w-1}+\sum_{i=0}^{w-2}x_{i}2^{i}\)</td>
+</tr>
+<tr>
+<td>反码</td>
+<td>\(B2O_{w}(\vec{x})\dot =-x_{w-1}(2^{w-1}-1)+\sum_{i=0}^{w-2}x_{i}2^{i}\)</td>
+</tr>
+<tr>
+<td>原码</td>
+<td>\(B2S_{w}(\vec{x})\dot =(-1)^{x_{w-1}}\cdot(\sum_{i=0}^{w-2}x_{i}2^{i})\)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="转换规则">转换规则</h3>
+<p>对于大多数C语言的实现，处理同样字长的有符号数和无符号数之间相互转换的一般规则是：数值可能会改变，但是位模式不变。转换关系如下：</p>
+<ul>
+<li>补码转换为无符号数，\(T2U_{w}(x)=x+x_{w-1}2^{w}\)。</li>
+<li>无符号数转换为补码，\(U2T_{w}(u)=u-u_{w-1}2^{w}\)。</li>
+</ul>
+<p>当执行一个运算时，如果它的一个运算数是有符号的而另一个是无符号的，那么 C 语言会隐式地将有符号参数强制类型转换为无符号数，并假设这两个数都是非负的，来执行这个运算。</p>
+<h3 id="扩展规则">扩展规则</h3>
+<p>要将一个无符号数转换为一个更大的数据类型，我们只要简单地在表示的开头添加 0，这种运算被称为零扩展（zero extension）。要将一个补码数字转换为一个更大的数据类型，可以执行一个符号扩展（sign extension），在表示中添加最高有效位的值。对于扩展大小和转换符号的顺序，C 语言标准要求，先扩展大小，再转换符号。</p>
+<h3 id="运算规则">运算规则</h3>
+<ul>
+<li>检测无符号数加法中的溢出：对满足 \(0\leq x,y\leq UMax_{w}\) 的 \(x\) 和 \(y\)，令 \(s\dot=x+_{w}^{u}y\)。当且仅当 \(s&lt;x\)（或者等价地 \(s&lt;y\)）时，计算 \(s\) 发生溢出。</li>
+<li>检测补码数字加法中的溢出：对满足 \(TMin_{w}\leq x,y\leq TMax_{w}\) 的 \(x\) 和 \(y\)，令 \(s\dot=x+_{w}^{t}y\)。当且仅当 \(x&gt;0\)，\(y&gt;0\)，但 \(s\leq 0\) 时，计算 \(s\) 发生正溢出。当且仅当 \(x&lt;0\)，\(y&lt;0\)，但 \(s\geq 0\) 时，计算 \(s\) 发生负溢出。</li>
+</ul>
+<p>计算一个位级表示的值的在补码加法下的逆元：第一种方法是对每一位取反，再对结果加 1，即 <code>-x == ~x + 1</code>；第二种方法是将最低位的 1 左侧的所有位取反。</p>
+<p>无符号乘法和补码乘法在截断之后的位级表示是相同的，该结论可以通过公式推导得出。</p>
+<p>整数乘法运算指令比其他整数运算（例如加法、减法、移位）更慢，因此编译器会尝试使用移位和加减法的组合来代替乘以常数因子的乘法。是否实际替换，取决于两种方案的相对速度。</p>
+<p>整数除法总是向零取整，即对于正数向下取整，对于负数向上取整。当使用移位运算替换除以 2 的幂的除法时，需要注意补码移位是向下取整。也就是说，对于负数需要添加“偏置（biasing）”值，从而使得其向零取整。如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x / (<span class="number">1</span> &lt;&lt; k) == (x &lt; <span class="number">0</span> ? x + (<span class="number">1</span> &lt;&lt; k) - <span class="number">1</span> : x) &gt;&gt; k</span><br></pre></td></tr></table></figure>
+<h2 id="浮点标准">浮点标准</h2>
+<p>IEEE 浮点标准用 \(V=(-1)^{s}\times M\times 2^{E}\) 的形式来表示一个数：</p>
+<ul>
+<li>
+<p>符号（sign） \(s\) 决定这数是负数（\(s=1\)）还是正数（\(s=0\)），而对于数值 0 的符号位解释作为特殊情况处理。</p>
+</li>
+<li>
+<p>尾数（significand） \(M\) 是一个二进制小数，它的范围是1 ~ \(2-\varepsilon\)，或者是 0 ~ \(1-\varepsilon\)。</p>
+</li>
+<li>
+<p>阶码（exponent） \(E\) 的作用是对浮点数加权，这个权重是 2 的 \(E\) 次幂（可能是负数）。</p>
+</li>
+</ul>
+<p>将浮点数的位表示划分为三个字段，分别对这些值进行编码：</p>
+<ul>
+<li>一个单独的符号位 \(s\) 直接编码符号 \(s\)。</li>
+<li>\(k\) 位的阶码字段 \(exp=e_{k-1}\cdots e_{1}e_{0}\) 编码阶码 \(E\)。</li>
+<li>\(n\) 位小数字段 \(frac=f_{n-1}\cdots f_{1}f_{0}\)，编码尾数 \(M\)，但是编码出来的值也依赖于阶码字段的值是否等于 0。</li>
+</ul>
+<p>图 2-32 给出了将这三个字段装进字中两种最常见的格式。在单精度浮点格式中，s、exp 和 frac 字段分别为 1 位、k = 8 位和 n = 23 位，得到一个 32 位的表示。在双精度浮点格式中，s、exp 和 frac 字段分别为 1 位、k = 11 位和 n = 52 位，得到一个 64 位的表示。</p>
+<p><img src="/img/System.assets/1722992357904.png" alt=""></p>
+<p>给定位表示，根据 exp 的值，被编码的值可以分成三种不同的情况。</p>
+<p><img src="/img/System.assets/1722992781731.png" alt=""></p>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>阶码</th>
+<th>尾数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>规格化的值</td>
+<td>\(E=e-Bias\)，\(Bias=2^{k-1}-1\)</td>
+<td>\(M=1+f\)</td>
+</tr>
+<tr>
+<td>非规格化的值</td>
+<td>\(E=1-Bias\)</td>
+<td>\(M=f\)</td>
+</tr>
+</tbody>
+</table>
+<p><img src="/img/System.assets/1722994306389.png" alt=""></p>
+<p>这种表示具有一个有趣的属性，假如我们将图 2-35 中的值的位表达式解释为无符号整数，它们就是按升序排列的，就像它们表示的浮点数一样。IEEE 格式如此设计就是为了浮点数能够使用整数排序函数来进行排序。当处理负数时，有一个小的难点，因为它们有开头的 1，并且它们是按照降序出现的，但是不需要浮点运算来进行比较也能解决这个问题。</p>
+<p>IEEE 浮点格式定义了四种不同的舍入方式：向偶数舍入（默认），向零舍入，向下舍入，向上舍入。向偶数舍入指的是，将正中间的值向偶数舍入。IEEE 标准中的浮点加法和乘法是可交换的，具有单调性，但是不可结合，不具有分配性。</p>
+</div></article></div><nav class="pagination" role="navigation" aria-label="pagination"><div class="pagination-previous"><a href="/page/2/">上一页</a></div><div class="pagination-next"><a href="/page/4/">下一页</a></div><ul class="pagination-list is-hidden-mobile"><li><a class="pagination-link" href="/">1</a></li><li><a class="pagination-link" href="/page/2/">2</a></li><li><a class="pagination-link is-current" href="/page/3/">3</a></li><li><a class="pagination-link" href="/page/4/">4</a></li><li><span class="pagination-ellipsis">&hellip;</span></li><li><a class="pagination-link" href="/page/44/">44</a></li></ul></nav></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/dark_souls.jpg" alt="Ligh0x74"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">Ligh0x74</p><p class="is-size-6 is-block">Developer</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Earth, Solar System</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">132</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">23</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">2</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/Ligh0x74" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Ligh0x74"><i class="fab fa-github"></i></a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://ppoffice.github.io/hexo-theme-icarus/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">ICARUS</span></span><span class="level-right"><span class="level-item tag">ppoffice.github.io</span></span></a></li><li><a class="level is-mobile" href="https://waline.js.org" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Waline</span></span><span class="level-right"><span class="level-item tag">waline.js.org</span></span></a></li><li><a class="level is-mobile" href="https://vercel.com" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Vercel</span></span><span class="level-right"><span class="level-item tag">vercel.com</span></span></a></li></ul></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/"><span class="level-start"><span class="level-item">书籍</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/"><span class="level-start"><span class="level-item">CSAPP/OSTEP</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/DDIA/"><span class="level-start"><span class="level-item">DDIA</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">基础</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E6%A8%A1%E6%9D%BF/"><span class="level-start"><span class="level-item">模板</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/OceanBase/"><span class="level-start"><span class="level-item">OceanBase</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/"><span class="level-start"><span class="level-item">算法</span></span><span class="level-end"><span class="level-item tag">88</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/AtCoder/"><span class="level-start"><span class="level-item">AtCoder</span></span><span class="level-end"><span class="level-item tag">16</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/Codeforces/"><span class="level-start"><span class="level-item">Codeforces</span></span><span class="level-end"><span class="level-item tag">34</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/LeetCode/"><span class="level-start"><span class="level-item">LeetCode</span></span><span class="level-end"><span class="level-item tag">38</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><span class="level-start"><span class="level-item">设计模式</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">3</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/C/"><span class="level-start"><span class="level-item">C++</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Java/"><span class="level-start"><span class="level-item">Java</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/"><span class="level-start"><span class="level-item">课程</span></span><span class="level-end"><span class="level-item tag">24</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/"><span class="level-start"><span class="level-item">CMU 15-445</span></span><span class="level-end"><span class="level-item tag">7</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/"><span class="level-start"><span class="level-item">GAMES101</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/"><span class="level-start"><span class="level-item">MIT 6.824</span></span><span class="level-end"><span class="level-item tag">11</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-ICS-OS/"><span class="level-start"><span class="level-item">NJU ICS/OS</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/"><span class="level-start"><span class="level-item">NJU Static Analysis</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/UCB-CS61A/"><span class="level-start"><span class="level-item">UCB CS61A</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-03T11:36:10.724Z">2024-09-03</time></p><p class="title"><a href="/2024/09/03/Lab%202%20Key%20Value%20Server/">Lab 2: Key/Value Server</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-02T13:42:42.121Z">2024-09-02</time></p><p class="title"><a href="/2024/09/02/Debugging/">Debugging</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-09-02T09:43:22.567Z">2024-09-02</time></p><p class="title"><a href="/2024/09/02/Lab%201%20MapReduce/">Lab 1: MapReduce</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/">MIT 6.824</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-30T14:43:58.383Z">2024-08-30</time></p><p class="title"><a href="/2024/08/30/%E7%AE%80%E5%8D%95%E7%9C%8B%E4%B8%8B%20Tai-e%20%E6%BA%90%E7%A0%81/">简单看下 Tai-e 源码</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/">NJU Static Analysis</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-08-20T02:58:46.061Z">2024-08-20</time></p><p class="title"><a href="/2024/08/20/GAMES101%20%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93/">GAMES101 课程总结</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/">GAMES101</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2024/"><span class="level-start"><span class="level-item">2024</span></span><span class="level-end"><span class="level-item tag">37</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/"><span class="level-start"><span class="level-item">2023</span></span><span class="level-end"><span class="level-item tag">95</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Debugging/"><span class="tag">Debugging</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hexo/"><span class="tag">Hexo</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://clist.by/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">CLIST</span></span><span class="level-right"><span class="level-item tag">clist.by</span></span></a></li><li><a class="level is-mobile" href="https://csdiy.wiki/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">CSDIY</span></span><span class="level-right"><span class="level-item tag">csdiy.wiki</span></span></a></li><li><a class="level is-mobile" href="https://www.ruanyifeng.com/blog/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">阮一峰的网络日志</span></span><span class="level-right"><span class="level-item tag">www.ruanyifeng.com</span></span></a></li></ul></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2024 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
             article: {
                 highlight: {
                     clipboard: true,
