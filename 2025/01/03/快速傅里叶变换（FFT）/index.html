@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>快速傅里叶变换（FFT） - Ligh0x74&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Ligh0x74&#039;s Blog"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ligh0x74&#039;s Blog"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="参考 Reducible。 问题 如何求两个 \(n\) 次多项式 \(A(x)\) 和 \(B(x)\) 的乘积 \(C(x)\)？最简单的方式是使用乘法分配律对每个系数做乘积，时间复杂度为 \(O(n^{2})\)。  $$ A(x)&amp;#x3D;a_{0}+a_{1}x^{1}+\cdots+a_{n-1}x^{n} \\ B(x)&amp;#x3D;b_{0}+b_{1}x^{1}+\cdots+b_{n-1}x^{n"><meta property="og:type" content="blog"><meta property="og:title" content="快速傅里叶变换（FFT）"><meta property="og:url" content="https://ligh0x74.github.io/2025/01/03/%E5%BF%AB%E9%80%9F%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2%EF%BC%88FFT%EF%BC%89/"><meta property="og:site_name" content="Ligh0x74&#039;s Blog"><meta property="og:description" content="参考 Reducible。 问题 如何求两个 \(n\) 次多项式 \(A(x)\) 和 \(B(x)\) 的乘积 \(C(x)\)？最简单的方式是使用乘法分配律对每个系数做乘积，时间复杂度为 \(O(n^{2})\)。  $$ A(x)&amp;#x3D;a_{0}+a_{1}x^{1}+\cdots+a_{n-1}x^{n} \\ B(x)&amp;#x3D;b_{0}+b_{1}x^{1}+\cdots+b_{n-1}x^{n"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://ligh0x74.github.io/img/Basic.assets/1735905579733.png"><meta property="article:published_time" content="2025-01-03T14:56:46.460Z"><meta property="article:modified_time" content="2025-01-03T15:09:12.005Z"><meta property="article:author" content="Ligh0x74"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://ligh0x74.github.io/img/Basic.assets/1735905579733.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://ligh0x74.github.io/2025/01/03/%E5%BF%AB%E9%80%9F%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2%EF%BC%88FFT%EF%BC%89/"},"headline":"快速傅里叶变换（FFT）","image":["https://ligh0x74.github.io/img/Basic.assets/1735905579733.png"],"datePublished":"2025-01-03T14:56:46.460Z","dateModified":"2025-01-03T15:09:12.005Z","author":{"@type":"Person","name":"Ligh0x74"},"publisher":{"@type":"Organization","name":"Ligh0x74's Blog","logo":{"@type":"ImageObject","url":"https://ligh0x74.github.io/img/logo.svg"}},"description":"参考 Reducible。 问题 如何求两个 \\(n\\) 次多项式 \\(A(x)\\) 和 \\(B(x)\\) 的乘积 \\(C(x)\\)？最简单的方式是使用乘法分配律对每个系数做乘积，时间复杂度为 \\(O(n^{2})\\)。  $$ A(x)&#x3D;a_{0}+a_{1}x^{1}+\\cdots+a_{n-1}x^{n} \\\\ B(x)&#x3D;b_{0}+b_{1}x^{1}+\\cdots+b_{n-1}x^{n"}</script><link rel="canonical" href="https://ligh0x74.github.io/2025/01/03/%E5%BF%AB%E9%80%9F%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2%EF%BC%88FFT%EF%BC%89/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/links">Links</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2025-01-03T14:56:46.460Z" title="2025/1/3 22:56:46">2025-01-03</time>发表</span><span class="level-item"><time dateTime="2025-01-03T15:09:12.005Z" title="2025/1/3 23:09:12">2025-01-03</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a><span> / </span><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/%E6%A8%A1%E6%9D%BF/">模板</a></span><span class="level-item">12 分钟读完 (大约1765个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">快速傅里叶变换（FFT）</h1><div class="content"><p>参考 <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=h7apO7q16V0">Reducible</a>。</p>
+<h2 id="问题">问题</h2>
+<p>如何求两个 \(n\) 次多项式 \(A(x)\) 和 \(B(x)\) 的乘积 \(C(x)\)？最简单的方式是使用乘法分配律对每个系数做乘积，时间复杂度为 \(O(n^{2})\)。</p>
+<div>
+$$
+A(x)=a_{0}+a_{1}x^{1}+\cdots+a_{n-1}x^{n} \\
+B(x)=b_{0}+b_{1}x^{1}+\cdots+b_{n-1}x^{n} \\
+C(x)=c_{0}+c_{1}x^{1}+\cdots+c_{2n}x^{2n}
+$$
+</div>
+<p>另一种想法是：① 在多项式 \(A(x)\) 和 \(B(x)\) 上取 \(2n+1\) 个点 \(x_{i}\)，其中 \(i=0,1,\cdots,2n\)，求出对应的函数值。② 根据 \(C({x_{i}})=A(x_{i})\cdot B(x_{i})\)，可以得到 \(C(x)\) 上的 \(2n+1\) 个点。③ 使用<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Lagrange_polynomial">拉格朗日插值</a>，化简得到 \(C(x)\) 的表达式。总时间复杂度为 \(O(n^{2})\)，如果能够将 ① 和 ③ 的时间复杂度优化为 \(O(n\log{n})\)，那么就能够降低总时间复杂度。</p>
+<h2 id="优化步骤-①">优化步骤 ①</h2>
+<p>可以发现，对于偶函数 \(f(x)=f(-x)\)，对于奇函数 \(f(x)=-f(-x)\)。如果将多项式分解为偶函数和奇函数两部分，则可以可以利用对称性快速求点值。不妨设 \(n\) 为偶数，将 \(n-1\) 次多项式 \(P(x)\) 划分为偶函数和奇函数两部分。</p>
+<div>
+$$
+\begin{align}P(x)&=p_{0}+p_{1}x^{1}+\cdots+p_{n-1}x^{n-1} \\&=(p_{0}+p_{2}x^{2}+\cdots+p_{n-2}x^{n-2})+(p_{1}+p_{3}x^{3}+\cdots+p_{n-1}x^{n-1}) \\&=(p_{0}+p_{2}x^{2}+\cdots+p_{n-2}x^{n-2})+x(p_{1}+p_{3}x^{2}+\cdots+p_{n-1}x^{n-2})\end{align}
+$$
+</div>
+<p>设 \(P_{e}(x)=p_{0}+p_{2}x^{1}+\cdots+p_{n-2}x^{\frac{n}{2}-2}\)，\(P_{o}(x)=p_{1}+p_{3}x^{2}+\cdots+p_{n-1}x^{\frac{n}{2}-2}\)，则 \(P(x)=P_{e}(x^{2})+xP_{o}(x^{2})\)。此时，如果取 \(n\) 个点 \(\pm x_{0},\pm x_{1},\cdots,\pm x_{\frac{n}{2}-1}\)，则只需要计算 \(P_{e}(x_{i}^{2})\) 和 \(P_{o}(x_{i}^{2})\)，就能够通过以下方式得到两个函数值。</p>
+<div>
+$$
+P(x_{i})=P_{e}(x_{i}^{2})+x_{i}P_{o}(x_{i}^{2}) \\
+P(-x_{i})=P_{e}(x_{i}^{2})-x_{i}P_{o}(x_{i}^{2})
+$$
+</div>
+<p>所以，要求 \(P(x)\) 上的 \(n\) 个点值，等价于求 \(P_{e}(x^{2})\) 和 \(P_{o}(x^{2})\) 上的 \(\frac{n}{2}\) 个点值，即点 \(x_{0},x_{1},\cdots,x_{\frac{n}{2}-1}\) 的值。此时，原问题被分解为两个相同的子问题，并且子问题的大小只有原问题的一半，如果子问题能够按照原问题的方式继续分解，则可以得到时间复杂度为 \(O(n\log{n})\) 的算法。</p>
+<p>但是，\(P_{e}(x^{2})\) 和 \(P_{o}(x^{2})\) 不能继续分解，因为定义域 \(x^{2}\geq 0\)，点 \(x_{0}^{2},x_{1}^{2},\cdots,x_{\frac{n}{2}-1}^{2}\) 不构成正负对，也就不能利用对称性求点值。如果能够取到一组构成正负对的点，在子问题中所有正点依然构成正负对，那么就可以继续递推。此时，需要引入复数，例如，取点 \(\pm 1,\pm i\) 构成正负对，子问题中 \(1^{2},i^{2}\) 等价于 \(1,-1\) 依然构成正负对。</p>
+<p><img src="/img/Basic.assets/1735905579733.png" alt=""></p>
+<p>那么对于 \(n-1\) 次多项式，如何取满足条件的 \(n\) 个点？假设取某个点 \(z\)，那么必然要取 \(-z\)，在子问题中 \(z\) 变为 \(z^{2}\)，那么必然要取 \(-z^{2}\)，以此类推，假设 \(n\) 为 \(2\) 的幂（总是可以通过对高次项补系数 \(0\) 取到），则最终得到 \(z^{n}\)。也就是说，所有取值的 \(n\) 次方都相等，不妨设 \(z^{n}=1\)，求解方程可以得到 \(n\) 个<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Root_of_unity">单位根</a>，即为满足条件的 \(n\) 个点。</p>
+<p>设复数 \(z=a+bi\)，则极坐标表示为 \(z=r(cos(\varphi)+isin(\varphi))\)，根据<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Euler%27s_formula">欧拉公式</a>，有 \(z=re^{\varphi i}\)。要求 \(z^{n}=1\)，即求 \(r^{n}e^{\varphi ni}=e^{2k\pi i}\)，得出 \(r=1,\varphi =\frac{2k\pi}{n}\)，所以 \(z=e^{\frac{2k\pi}{n}i}\)，其中 \(k=0,1,\cdots,n-1\)。设 \(w_{n}=e^{\frac{2\pi}{n}i}\)，则 \(n\) 个单位根分别为 \(w_{n}^{0},w_{n}^{1},\cdots,w_{n}^{n-1}\)，它们将复平面中的单位圆 \(n\) 等分。</p>
+<p>观察单位根的性质，有 \(w_{n}^{k}=-w_{n}^{k+\frac{n}{2}}\)，\(w_{n}^{k}=w_{\frac{n}{2}}^{\frac{k}2}\)，所以 \(w_{n}^{0},w_{n}^{1},\cdots,w_{n}^{\frac{n}{2}-1}\) 和 \(w_{n}^{\frac{n}{2}},w_{n}^{\frac{n}{2}+1},\cdots,w_{n}^{n-1}\) 构成正负对。在子问题中，\(w_{n}^{0},w_{n}^{1},\cdots,w_{n}^{\frac{n}{2}-1}\) 变为 \(w_{n}^{0},w_{n}^{2},\cdots,w_{n}^{n-2}\)，等价于 \(w_{\frac{n}{2}}^{0},w_{\frac{n}{2}}^{1},\cdots,w_{\frac{n}{2}}^{\frac{n}{2}-1}\)，前半和后半依然构成正负对，以此类推。从复平面的角度思考，更容易理解。</p>
+<p>根据上述讨论，单位根的正负对性质，在所有子问题中都成立，所以求 \(n-1\) 次多项式 \(P(x)\) 的 \(n\) 个点值，可以使用递归分治的方式求解。当 \(n=1\) 时，多项式是常数，\(P(w_{1}^{0})\) 就是该常数值。当 \(n&gt;1\) 时，如果已知 \(P_{e}(x^{2})\) 和 \(P_{o}(x^{2})\) 在 \(w_{n}^{k}\) 的点值，其中 \(k&lt;\frac{n}{2}\)，则利用之前推出的 \(P(x)=P_{e}(x^{2})+xP_{o}(x^{2})\) 公式可以得到以下两个函数值。</p>
+<div>
+$$
+P(w_{n}^{k})
+=P_{e}(w_{n}^{2k})+w_{n}^{k}P_{o}(w_{n}^{2k}) \\
+P(-w_{n}^{k})
+=P(w_{n}^{k+\frac{n}{2}})
+=P_{e}(w_{n}^{2k+n})+w_{n}^{k+\frac{n}{2}}P_{o}(w_{n}^{2k+n})
+=P_{e}(w_{n}^{2k})-w_{n}^{k}P_{o}(w_{n}^{2k})
+$$
+</div>
+<h2 id="优化步骤-③">优化步骤 ③</h2>
+<p>步骤 ① 是已知系数，求 \(n-1\) 次多项式 \(P(x)\) 在 \(n\) 个 \(n\) 次单位根位置的值，可以看作矩阵相乘的形式。</p>
+<div>
+$$
+\left[\begin{matrix}P(w_{n}^{0}) \\P(w_{n}^{1}) \\P(w_{n}^{2}) \\\vdots \\P(w_{n}^{n-1})\end{matrix}\right]=\left[\begin{matrix}w_{n}^{0} & w_{n}^{0} & w_{n}^{0} & \cdots & w_{n}^{0} \\w_{n}^{0} & w_{n}^{1} & w_{n}^{2} & \cdots & w_{n}^{n-1} \\w_{n}^{0} & w_{n}^{2} & w_{n}^{4} & \cdots & w_{n}^{2(n-1)} \\\vdots & \vdots & \ddots & \vdots \\w_{n}^{0} & w_{n}^{n-1} & w_{n}^{2(n-1)} & \cdots & w_{n}^{(n-1)(n-1)}\end{matrix}\right]\left[\begin{matrix}p_{0} \\p_{1} \\p_{2} \\\vdots \\p_{n-1}\end{matrix}\right]
+$$
+</div>
+<p>步骤 ③ 是已知 \(n\) 个点值，求多项式的系数，可以看作上述变换的逆变换。</p>
+<div>
+$$
+\left[\begin{matrix}p_{0} \\p_{1} \\p_{2} \\\vdots \\p_{n-1}\end{matrix}\right]=\left[\begin{matrix}w_{n}^{0} & w_{n}^{0} & w_{n}^{0} & \cdots & w_{n}^{0} \\w_{n}^{0} & w_{n}^{1} & w_{n}^{2} & \cdots & w_{n}^{n-1} \\w_{n}^{0} & w_{n}^{2} & w_{n}^{4} & \cdots & w_{n}^{2(n-1)} \\\vdots & \vdots & \ddots & \vdots \\w_{n}^{0} & w_{n}^{n-1} & w_{n}^{2(n-1)} & \cdots & w_{n}^{(n-1)(n-1)}\end{matrix}\right]^{-1}\left[\begin{matrix}P(w_{n}^{0}) \\P(w_{n}^{1}) \\P(w_{n}^{2}) \\\vdots \\P(w_{n}^{n-1})\end{matrix}\right]
+$$
+</div>
+<div>
+$$
+\left[\begin{matrix}w_{n}^{0} & w_{n}^{0} & w_{n}^{0} & \cdots & w_{n}^{0} \\w_{n}^{0} & w_{n}^{1} & w_{n}^{2} & \cdots & w_{n}^{n-1} \\w_{n}^{0} & w_{n}^{2} & w_{n}^{4} & \cdots & w_{n}^{2(n-1)} \\\vdots & \vdots & \ddots & \vdots \\w_{n}^{0} & w_{n}^{n-1} & w_{n}^{2(n-1)} & \cdots & w_{n}^{(n-1)(n-1)}\end{matrix}\right]^{-1}=\frac{1}{n}\left[\begin{matrix}w_{n}^{0} & w_{n}^{0} & w_{n}^{0} & \cdots & w_{n}^{0} \\w_{n}^{0} & w_{n}^{-1} & w_{n}^{-2} & \cdots & w_{n}^{-(n-1)} \\w_{n}^{0} & w_{n}^{-2} & w_{n}^{-4} & \cdots & w_{n}^{-2(n-1)} \\\vdots & \vdots & \ddots & \vdots \\w_{n}^{0} & w_{n}^{-(n-1)} & w_{n}^{-2(n-1)} & \cdots & w_{n}^{-(n-1)(n-1)}\end{matrix}\right]
+$$
+</div>
+<p>如果将步骤 ① 表示为 \(FFT(w_{n},p_{0},p_{1},\cdots,p_{n-1})\)，则步骤 ③ 为  \(IFFT(w_{n},P(w_{n}^{0}),P(w_{n}^{1}),\cdots,P(w_{n}^{n-1}))=\frac{1}{n}FFT(w_{n}^{-1},P(w_{n}^{0}),P(w_{n}^{1}),\cdots,P(w_{n}^{n-1}))\)。</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>快速傅里叶变换（FFT）</p><p><a href="https://ligh0x74.github.io/2025/01/03/快速傅里叶变换（FFT）/">https://ligh0x74.github.io/2025/01/03/快速傅里叶变换（FFT）/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Ligh0x74</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2025-01-03</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2025-01-03</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a><a class="icons" rel="noopener" target="_blank" title="ShareAlike" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-sa"></i></a></p></div></div></div></div></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2024/10/03/Coroutines%20for%20Go/"><span class="level-item">Coroutines for Go（草稿）</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="waline-thread"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.css"><script src="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.js"></script><script>Waline.init({
+            el: '#waline-thread',
+            serverURL: "https://blog-waline-ligh0x74.vercel.app",
+            path: window.location.pathname,
+            lang: "zh-CN",
+            locale: {"placeholder":"Comment here..."},
+            emoji: ["//unpkg.com/@waline/emojis@1.0.1/weibo"],
+            dark: "auto",
+            meta: ["nick","mail","link"],
+            requiredMeta: [],
+            login: "enable",
+            
+            pageSize: 10,
+            imageUploader: false,
+            
+            texRenderer: false,
+            search: false,
+            pageview: false,
+            comment: false,
+            copyright: true,
+        });</script></div></div></div><!--!--><div class="column column-right is-4-tablet is-4-desktop is-4-widescreen  order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#问题"><span class="level-left"><span class="level-item">1</span><span class="level-item">问题</span></span></a></li><li><a class="level is-mobile" href="#优化步骤-①"><span class="level-left"><span class="level-item">2</span><span class="level-item">优化步骤 ①</span></span></a></li><li><a class="level is-mobile" href="#优化步骤-③"><span class="level-left"><span class="level-item">3</span><span class="level-item">优化步骤 ③</span></span></a></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2025 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/mhchem.min.js" defer></script><script>window.addEventListener("load", function() {
+            document.querySelectorAll('[role="article"] > .content').forEach(function(element) {
+                renderMathInElement(element);
+            });
+        });</script><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
