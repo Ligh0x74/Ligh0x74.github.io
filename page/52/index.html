@@ -97,7 +97,7 @@
 <figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> redis.call(<span class="string">&quot;get&quot;</span>,KEYS[<span class="number">1</span>]) == ARGV[<span class="number">1</span>]</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">    <span class="keyword">return</span> redis.call(<span class="string">&quot;del&quot;</span>,KEYS[<span class="number">1</span>])</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
 <p>严格来说，这是只是近似的分布式锁，当锁过期时，存在两个客户端同时执行操作的情况。如果只是将锁用于提升效率（例如缓存重建），那么也不会有什么问题。如果是用于互斥操作共享数据，则会有正确性问题。<a target="_blank" rel="noopener" href="https://redis.io/docs/latest/develop/use/patterns/distributed-locks/">Redlock</a> 算法的基本想法是利用多数原则来选举，减少锁失效的可能性以及提高容错性，但是成本更大而且并不能保证互斥，由于存在进程暂停、网络延迟和时钟同步问题。（推荐阅读 <a target="_blank" rel="noopener" href="https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html">How to do distributed locking</a>）</p>
 <p>要实现严格互斥的分布式锁可以使用 ZooKeeper + Fencing 令牌来实现，ZooKeeper 用于实现<a href="https://ligh0x74.github.io/2024/02/05/ZooKeeper%20Wait-free%20coordination%20for%20Internet-scale%20systems/#%E6%97%A0%E7%BE%8A%E7%BE%A4%E6%95%88%E5%BA%94%E7%9A%84%E7%AE%80%E5%8D%95%E9%94%81">无羊群效应的简单锁</a>，而 Fencing 令牌用于标记锁和存储服务的版本，从而解决进程暂停导致的问题。也可以使用单机 MySQL 实现分布式锁，例如在事务中使用 <code>FOR UPDATE</code> 当前读来锁定行或者使用 <code>GET_LOCK()</code> <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.4/en/locking-functions.html">函数</a>，从而允许客户端宕机时自动释放锁，又或者使用插入指定主键记录 + 过期时间字段来确保不会一直持有锁。</p>
-</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-12-31T16:00:00.000Z" title="2023/1/1 00:00:00">2023-01-01</time>发表</span><span class="level-item"><time dateTime="2025-06-20T02:39:21.508Z" title="2025/6/20 10:39:21">2025-06-20</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a><span> / </span><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/%E6%95%B0%E5%AD%A6/">数学</a></span><span class="level-item">36 分钟读完 (大约5341个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2023/01/01/Introduction%20to%20Linear%20Algebra/">Introduction to Linear Algebra</a></p><div class="content"><p>参考 <a target="_blank" rel="noopener" href="https://math.mit.edu/~gs/linearalgebra/">Introduction to Linear Algebra</a>，<a target="_blank" rel="noopener" href="https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/">MIT 18.06SC Fall 2011</a>，<a target="_blank" rel="noopener" href="https://math.mit.edu/~gs/linearalgebra/ila6/ila6sols.pdf">SOLUTIONS TO PROBLEM SETS</a>。</p>
+</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-12-31T16:00:00.000Z" title="2023/1/1 00:00:00">2023-01-01</time>发表</span><span class="level-item"><time dateTime="2025-06-22T03:42:32.895Z" title="2025/6/22 11:42:32">2025-06-22</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a><span> / </span><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/%E6%95%B0%E5%AD%A6/">数学</a></span><span class="level-item">1 小时读完 (大约8616个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2023/01/01/Introduction%20to%20Linear%20Algebra/">Introduction to Linear Algebra</a></p><div class="content"><p>参考 <a target="_blank" rel="noopener" href="https://math.mit.edu/~gs/linearalgebra/">Introduction to Linear Algebra</a>，<a target="_blank" rel="noopener" href="https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/">MIT 18.06SC Fall 2011</a>，<a target="_blank" rel="noopener" href="https://math.mit.edu/~gs/linearalgebra/ila6/ila6sols.pdf">SOLUTIONS TO PROBLEM SETS</a>。</p>
 <h2 id="Vectors-and-Matrices">Vectors and Matrices</h2>
 <h3 id="Vectors-and-Linear-Combinations">Vectors and Linear Combinations</h3>
 <p>\(n\) 个 \(m\) 维向量组成 \(m \times n\) 矩阵 \(A\) 的列。两个关键问题：① 列向量的线性组合 \(Ax = x_{1}v_{1} + x_{2}v_{2} + \cdots + x_{n}v_{n}\) 是否填满整个空间？如果不能，则 \(A\) 是奇异矩阵，其列向量是线性相关的。② 已知 \(A\) 和 \(b\)，求解 \(Ax = b\)。</p>
@@ -800,6 +800,279 @@ rank(A) = rank(ABB^{-1}) \leq \min(rank(AB), rank(B^{-1})) = \min(rank(AB), n) =
 $$
 </div>
 <h2 id="Orthogonality">Orthogonality</h2>
+<h3 id="Orthogonality-of-Vectors-and-Subspaces">Orthogonality of Vectors and Subspaces</h3>
+<p>正交向量满足 \(v \cdot w = v^{T}w = 0\) 和 \(|v|^{2} + |w|^{2} = |v + w|^{2}\)。如果子空间 \(V\) 中的任意向量 \(v\) 和子空间 \(W\) 中的任意向量 \(w\) 满足 \(v^{T}w = 0\)，则子空间 \(V\) 和 \(W\) 正交。如果 \(V\) 和 \(W\) 是 \(\mathbf{R}^{n}\) 中的正交子空间，则 \(\dim{V} + \dim{W} \leq n\)。\(V\) 的正交补 \(V^{\perp}\) 包含所有和 \(V\) 正交的向量。两个正交子空间的交集仅包含零向量。每个秩为 \(r\) 的矩阵都有 \(r \times r\) 的可逆子矩阵。</p>
+<p>任意矩阵 \(A\) 的行空间和零空间正交，列空间和左零空间正交。非正式证明：零空间的向量 \(x\) 满足 \(Ax = 0\)，可以发现 \(A\) 中的每个行向量点乘 \(x\) 都是零，所以 \(A\) 中行向量的线性组合和 \(x\) 正交，即行空间和零空间正交。正式证明：假设 \(x\) 在零空间中、\(A^{T}y\) 在行空间中，则 \(x\) 满足 \(Ax = 0\)，两者的内积 \(x^{T}(A^{T}y) = (Ax)^{T}y = 0^{T}y = 0\)，所以零空间和行空间正交。同理，可以证明列空间和左零空间正交。</p>
+<p>行空间和零空间互为正交补 \(r + (n - r) = n\)，列空间和左零空间互为正交补 \(r + m - r = m\)。行空间和零空间组合构成整个 \(\mathbf{R}^{n}\) 空间，列空间和左零空间组合构成整个 \(\mathbf{R}^{m}\) 空间。\(\mathbf{R}^{n}\) 空间中的向量可以表示为 \(x = x_{row} + x_{null}\)，\(\mathbf{R}^{m}\) 中的向量可以表示为 \(y = y_{col} + y_{null}\)。对于 \(Ax = b, x = x_{r} + x_{n}\)，列空间中的每个向量 \(b\) 都由行空间中唯一的向量 \(x_{r}\) 确定。</p>
+<p><img src="/img/Math.assets/1750392035663.png" alt=""></p>
+<h3 id="Projections-onto-Lines-and-Subspaces">Projections onto Lines and Subspaces</h3>
+<p>假设向量 \(b\) 在向量 \(a\) 所在直线上的投影是向量 \(p\)，则向量 \(p\) 是向量 \(a\) 的倍数，误差向量（error vector）\(e = b - p\) 和向量 \(a\) 垂直。如果 \(b = a\)，投影 \(p = a\)。如果 \(a^{T}b = 0\)，则投影 \(p = 0\)。向量 \(bpe\) 组成直角三角形的三条边。</p>
+<div>
+$$
+p = \hat{x}a, e = b - p, a \cdot e = 0
+\rightarrow
+\hat{x} = \frac{a \cdot b}{a \cdot a} = \frac{a^{T}b}{a^{T}a}
+\rightarrow
+\|p\| = \frac{\|a\|\|b\|\cos{\theta}}{\|a\|^{2}}\|a\| = \|b\|\cos{\theta}
+$$
+</div>
+<p>将向量 \(b\) 投影到向量 \(a\) 所在直线上的投影矩阵 \(P\) 满足 \(p = Pb\) 和 \(P^{2} = P = P^{T}\)。通过以下推导可知，矩阵 \(P\) 由列向量 \(a\) 和行向量 \(a^{T}\) 的外积再除以 \(a^{T}{a}\) 得到，它的秩为 \(1\)，而且和向量 \(b\) 无关，只和向量 \(a\) 有关。如果 \(P\) 将向量投影到某个子空间，则 \(I - P\) 将向量投影到该子空间的正交子空间中。</p>
+<div>
+$$
+p = a\hat{x} = a\frac{a^{T}b}{a^{T}a} = Pb
+\rightarrow
+P = \frac{aa^{T}}{a^{T}a}
+$$
+</div>
+<p>将向量 \(b\) 投影到 \(m \times n\) 列满秩矩阵 \(A\) 的列空间中，投影向量 \(p\) 根据矩阵 \(A\) 列向量的某种组合 \(\hat{x}\) 得到，误差向量 \(e = b - p\) 和 \(A\) 的列空间垂直，\(|e|\) 是向量 \(b\) 到列空间的距离。根据垂直关系，分别求解得到向量 \(\hat{x}\)、投影向量 \(p\) 以及投影矩阵 \(P\)。对称矩阵 \(A^{T}A\) 是可逆的，当且仅当 \(A\) 的列向量线性无关，两者有相同的零空间 \(\mathbf{N}(A^{T}A) = \mathbf{N}(A)\)。如果 \(P\) 是可逆矩阵，则必然有 \(P^{-1}P^{2} = P^{-1}P \rightarrow P = I\)。</p>
+<div>
+$$
+A =
+\left[\begin{matrix}
+a_{1} & a_{2} & \cdots & a_{n}
+\end{matrix}\right]
+, \hat{x} =
+\left[\begin{matrix}
+\hat{x_{1}} \\ \hat{x_{2}} \\ \vdots \\ \hat{x_{n}}
+\end{matrix}\right]
+, p = A\hat{x}
+$$
+</div>
+<div>
+$$
+A^{T}e = A^{T}(b - A\hat{x}) = 0
+\rightarrow
+\hat{x} = (A^{T}A)^{-1}A^{T}b
+\rightarrow
+p = A\hat{x} = A(A^{T}A)^{-1}A^{T}b = Pb
+\rightarrow
+P = A(A^{T}A)^{-1}A^{T}
+$$
+</div>
+<h3 id="Least-Squares-Approximations">Least Squares Approximations</h3>
+<p>假设矩阵 \(A\) 的列向量线性无关，误差 \(e = b - Ax\) 不总是为零，当 \(e\) 为零时，\(x\) 是 \(Ax = b\) 的精确解。否则，假设 \(e\) 的长度在 \(\hat{x}\) 处取到最小值 \(|b - A\hat{x}|^{2}\)，此时 \(\hat{x}\) 是 \(Ax = b\) 的最小二乘解。误差 \(e\) 何时取到最小值？</p>
+<p>几何角度：当 \(b\) 不在 \(Ax\) 的列空间中时，找到列空间中最接近 \(b\) 的点 \(p\)，该 \(p\) 就是 \(b\) 在列空间上的投影，此时 \(e\) 的长度最小，根据上节投影知识，知道 \(\hat{x}\) 满足 \(A^{T}A\hat{x} = A^{T}b\)。代数角度：将向量 \(b\) 分解为在 \(Ax\) 的列空间中的向量 \(p\) 和垂直列空间的向量 \(e\)，\(Ax = b = p + e\) 无解，但是 \(Ax = p\) 有解，误差向量长度的平方 \(|Ax - b|^{2} = |Ax - p|^{2} + |e|^{2}\)，当 \(Ax = p\) 时误差最小，此时 \(x = \hat{x}\)。（还有微积分角度，偏导为零）</p>
+<p><img src="/img/Math.assets/1750423154421.png" alt=""></p>
+<p>如果矩阵 \(A\) 的列向量线性相关，此时 \(A^{T}A\) 不可逆，不能使用 \(A^{T}A\hat{x} = A^{T}b\) 求解 \(\hat{x}\)。将 \(b\) 分解为 \(b = p + e\)，此时 \(A\hat{x} = p\) 有无穷多个解，因为 \(A\) 的零空间有非零向量。</p>
+<h3 id="Orthonormal-Bases-and-Gram-Schmidt">Orthonormal Bases and Gram-Schmidt</h3>
+<p>互相垂直的单位向量（长度为 \(1\) 的向量）构成的基被称为标准正交基（orthonormal basis）。注意，标准基（standard basis）是标准正交基的特例。如果 \(m \times n\) 矩阵 \(Q\) 的列向量是标准正交的，则 \(Q^{T}Q = I\)。如果 \(Q\) 不是方阵，则反过来不成立 \(QQ^{T} \neq I\)。如果 \(Q\) 是方阵，则 \(Q^{T}Q = I\) 意味着 \(Q^{T} = Q^{-1}\)，此时 \(Q\) 被称为正交矩阵。每个置换矩阵都是正交矩阵。如果 \(Q\) 的列向量是标准正交的，则 \((Qx)^{T}(Qy) = x^{T}Q^{T}Qy = x^{T}y\)，所以 \(|Qx| = |x|\)。</p>
+<p>如果投影使用列向量标准正交的矩阵 \(Q\)，而不是列向量线性无关的矩阵 \(A\)，可以得到如下公式。投影 \(p\) 由标准正交向量组合而成，其分量是 \(q_{i}(q_{i}^{T}b) = q_{i}(|q_{i}||b|\cos{\theta_{i}}) = q_{i}(|b|\cos{\theta_{i}})\)。</p>
+<div>
+$$
+Q^{T}Q\hat{x} = Q^{T}b
+\rightarrow
+\hat{x}  = Q^{T}b
+\rightarrow
+p = Q\hat{x} = QQ^{T}b
+\rightarrow
+P = QQ^{T}
+$$
+</div>
+<div>
+$$
+p =
+\left[\begin{matrix}
+q_{1} & q_{2} & \cdots & q_{n}
+\end{matrix}\right]
+\left[\begin{matrix}
+q_{1}^{T}b \\ q_{2}^{T}b \\ \vdots \\ q_{n}^{T}b
+\end{matrix}\right]
+= q_{1}(q_{1}^{T}b) + \cdots + q_{n}(q_{n}^{T}b)
+$$
+</div>
+<p>使用 Gram-Schmidt 方法，从线性无关向量 \(a_{1},\cdots,a_{n}\) 构造标准正交向量 \(q_{1},\cdots,q_{n}\)。首先将 \(a_{1}\) 作为第一个正交向量 \(A_{1}\)，假设当前已经处理到 \(a_{j}\)，之前的标准正交向量是 \(q_{1}\) 到 \(q_{j - 1}\)。那么第 \(j\) 个正交向量 \(A_{j}\) 就是 \(a_{j}\) 中和之前所有正交向量都垂直的分量，求该分量类似求投影中的误差向量 \(e\)。让 \(a_j\) 减去其在所有 \(q_{i}\) 上的投影向量 \(p_{j}\)，得到的就是分量 \(A_{j}\)，再除以自身长度就得到标准正交向量 \(q_{j}\)。</p>
+<div>
+$$
+A_{j}
+= a_{j} - p_{j}
+= a_{j} - \sum_{i = 1}^{j - 1}q_{i}({q_{i}^{T}a_{j}})
+= q_{j}\|A_{j}\|
+= q_{j}(\|a_{j}\|\cos{\theta_{j}})
+= q_{j}(q_{j}^{T}a_{j})
+$$
+</div>
+<p>使用该方法构造的向量满足 \(A = QR\)，矩阵 \(R = Q^{T}A\) 是上三角矩阵，因为之后的 \(q\) 和之前的 \(a\) 正交。因为 \(A\) 的列向量线性无关，\(a_{i}\) 在 \(q_{i}\) 上的分量必然不为零，所以 \(R\) 中的对角元素都是非零正数，矩阵 \(R\) 可逆。正交矩阵 \(Q_{1}\) 乘以正交矩阵 \(Q_{2}\) 结果仍是正交矩阵，\(Q_{2}^{T}Q_{1}^{T}Q_{1}Q_{2} = I = (Q_{1}Q_{2})^{T}(Q_{1}Q_{2})\)。</p>
+<div>
+$$
+A =
+\left[\begin{matrix}
+a_{1} & a_{2} & \cdots & a_{n}
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+q_{1} & q_{2} & \cdots & q_{n}
+\end{matrix}\right]
+\left[\begin{matrix}
+q_{1}^{T}a_{1} & q_{1}^{T}a_{2} & \cdots & q_{1}^{T}a_{n} \\
+& q_{2}^{T}a_{2} & \cdots & q_{2}^{T}a_{n} \\
+& & \ddots & \vdots \\
+& & & q_{n}^{T}a_{n}
+\end{matrix}\right]
+= QR
+$$
+</div>
+<div>
+$$
+A^{T}A\hat{x} = A^{T}b
+\rightarrow
+(QR)^{T}QR\hat{x} = (QR)^{T}b
+\rightarrow
+R\hat{x} = Q^{T}b
+$$
+</div>
+<h3 id="The-Pseudoinverse-of-a-Matrix">The Pseudoinverse of a Matrix</h3>
+<p>每个矩阵 \(A\) 都有伪逆 \(A^{+}\)。当 \(r = n &lt; m\) 时，\(Ax = b\) 无解或者有唯一解，左逆 \(A^{+}\) 对应方程的最小二乘解 \(\hat{x} = (A^{T}A)^{-1}A^{T}b = A^{+}b\)。当 \(r = m &lt; n\) 时，\(Ax = b\) 有无穷多个解，右逆 \(A^{+}\) 对应方程的最小长度解 \(x^{+} = A^{+}b\)，通解是 \(x = x^{+} + x_{n}\)，最小长度意味着在零空间中的分量为零。当 \(r &lt; m, n\) 时，\(Ax = b\) 无解或者有无穷多个解，伪逆 \(A^{+}\) 对应方程的最小范数（norm）最小二乘解 \(x^{+} = A^{+}b\)，不仅最小化 \(|Ax - b|^{2}\)，而且最小化 \(|x|\)。</p>
+<p><img src="/img/Math.assets/1750495924429.png" alt=""></p>
+<p>对于 \(m \times n\) 矩阵 \(A\)，其伪逆 \(A^{+}\) 是 \(n \times m\) 矩阵。每个在 \(m\) 维空间中的向量 \(y\) 可以分解为垂直的两部分 \(y = b + z\)，\(b\) 在 \(A\) 的列空间中，\(z\) 在 \(A\) 的左零空间中，行空间中的某个向量 \(x\) 满足 \(Ax = b\)。\(A^{+}\) 和 \(A^{T}\) 有相同的四个子空间，\(A^{+}A\) 将向量投影到矩阵 \(A\) 的行空间中，\(AA^{+}\) 将向量投影到矩阵 \(A\) 的列空间中。</p>
+<div>
+$$
+A^{+}b = x,\ A^{T}z = A^{+}z = 0,\ A^{+}y = A^{+}b + A^{+}z = x
+$$
+</div>
+<div>
+$$
+P_{row} = A^{+}A = (A^{+}A)^{2} = (A^{A}A)^{T},\ P_{column} = AA^{+} = (AA^{+})^{2} = (AA^{+})^{T}
+$$
+</div>
+<p><img src="/img/Math.assets/1750507558237.png" alt=""></p>
+<div>
+$$
+A^{+}
+= R^{+}C^{+}
+= R^{T}(RR^{T})^{-1}(C^{T}C)^{-1}C^{T}
+= R^{T}(C^{T}CRR^{T})^{-1}C^{T}
+= R^{T}(C^{T}AR^{T})^{-1}C^{T}
+$$
+</div>
+<div>
+$$
+AA^{+}A = A,\ A^{+}AA^{+} = A^{+},\ (A^{+}A)^{T} = A^{+}A,\ (AA^{+})^{T} = AA^{+}
+$$
+</div>
+<h2 id="Determinants">Determinants</h2>
+<h3 id="3-by-3-Determinants-and-Cofactors">3 by 3 Determinants and Cofactors</h3>
+<p>单位矩阵的行列式有 \(\det{I} = 1\)，行交换会反转行列式的符号，行向量乘以某个数会使行列式也乘以该数，行列式是行向量的多重线性函数，\(n\) 阶行列式有 \(n!\) 项，每项包含不同行不同列的元素。矩阵 \(A\) 中元素 \(a_{ij}\) 的余子式（minor）\(M_{ij}\) 是将第 \(i\) 行第 \(j\) 列移除之后，剩余的 \(n - 1\) 阶子矩阵的行列式。元素 \(a_{ij}\) 的代数余子式（cofactor）\(C_{ij}\) 是余子式乘以符号因子 \(C_{ij} = (-1)^{i + j}M_{ij}\)。将第 \(i\) 行中的元素分别乘以对应的代数余子式，然后求和可以得到矩阵 \(A\) 的行列式。</p>
+<div>
+$$
+\det
+\left[\begin{matrix}
+xa + yA & xb + yB \\ c & d
+\end{matrix}\right]
+= x(ad - bc) + y(Ad - Bc),\
+\det A = a_{i1}C_{i1} + \cdots + a_{in}C_{in}
+$$
+</div>
+<p>将矩阵 \(A\) 乘以对应的代数余子式矩阵 \(C\) 的转置（伴随矩阵），将会得到 \((\det{A})I\)。对角线以外的元素都为零，因为其余元素都可以看作是具有两个相同行的矩阵的行列式，行交换会改变行列式的符号，而交换两个相同行得到的行列式相同，所以该矩阵的行列式是零，即其余元素的值为零。由于 \(A^{-1}\) 需要除以行列式得到，所以可逆矩阵的行列式不等于零。逆矩阵 \(A^{-1}\) 中的每个元素，都由两个行列式之比得到（代数余子式比 \(A\) 的行列式）。</p>
+<div>
+$$
+AC^{T} =
+\left[\begin{matrix}
+a & b \\ c & d
+\end{matrix}\right]
+\left[\begin{matrix}
+d & -c \\ -b & a
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+\det{A} & 0 \\ 0 & \det{A}
+\end{matrix}\right]
+= (\det{A})I
+\rightarrow
+A^{-1} = \frac{C^{T}}{\det{A}}，
+(A^{-1})_{ij} = \frac{C_{ji}}{\det{A}}
+$$
+</div>
+<h3 id="Computing-and-Using-Determinants">Computing and Using Determinants</h3>
+<p>三角矩阵和对角矩阵的行列式可以由对角线元素相乘得到，转置矩阵和原矩阵的行列式相同，矩阵乘积的行列式等于矩阵行列式的乘积。矩阵相加的行列式不意味着矩阵行列式相加，例如 \(\det{I + I} = 2^{n}\)。正交矩阵的行列式为 \(\pm{1}\)，可逆矩阵的行列式为主元乘积再乘上 \(\pm{1}\)，矩阵 \(U\) 的行列式是主元乘积，矩阵 \(L\) 的行列式是 \(1\)，矩阵 \(P\) 的行列式是 \(\pm{1}\)。</p>
+<div>
+$$
+\det
+\left[\begin{matrix}
+a & b & c \\
+& q & r \\
+& & z
+\end{matrix}\right]
+=
+\det
+\left[\begin{matrix}
+a & & \\
+& q & \\
+& & z
+\end{matrix}\right]
+= aqz,\
+\det{A^{T}} = \det{A},\
+\det{AB} = (\det{A})(\det{B})
+$$
+</div>
+<div>
+$$
+(\det{Q})^{2} = (\det{Q^{T}})(\det{Q}) = \det{Q^{T}Q} = \det{I} = 1
+$$
+</div>
+<div>
+$$
+PA = LU \rightarrow (\det{P})(\det{A}) = (\det{L})(\det{U}) = (\det{U})
+$$
+</div>
+<div>
+$$
+\det
+\left[\begin{matrix}
+row\ 1 \\
+row\ 2 - drow\ 1 \\
+row\ n
+\end{matrix}\right]
+=
+\det
+\left[\begin{matrix}
+row\ 1 \\
+row\ 2 \\
+row\ n
+\end{matrix}\right]
+-
+d\det
+\left[\begin{matrix}
+row\ 1 \\
+row\ 1 \\
+row\ n
+\end{matrix}\right]
+= \det{A}
+$$
+</div>
+<p>克莱姆法则：如果 \(\det{A}\) 不为零，则可以使用行列式求解 \(Ax = b\)，矩阵 \(B_{j}\) 通过将 \(A\) 的第 \(j\) 列替换为向量 \(b\) 得到。</p>
+<div>
+$$
+AM_{1} =
+\left[\begin{matrix}
+& & \\
+& A & \\
+& &
+\end{matrix}\right]
+\left[\begin{matrix}
+x_{1} & 0 & 0 \\
+x_{2} & 1 & 0 \\
+x_{3} & 0 & 1
+\end{matrix}\right]
+=
+\left[\begin{matrix}
+b_{1} & a_{12} & a{13} \\
+b_{2} & a_{22} & a_{23} \\
+b_{3} & a_{32} & a_{33}
+\end{matrix}\right]
+= B_{1}
+\rightarrow
+x_{1} = \frac{\det{B_{1}}}{\det{A}}
+$$
+</div>
+<div>
+$$
+x_{1} = \frac{\det{B_{1}}}{\det{A}},
+x_{2} = \frac{\det{B_{2}}}{\det{A}},
+\dots,
+x_{n} = \frac{\det{B_{n}}}{\det{A}}
+$$
+</div>
+<h3 id="Areas-and-Volumes-by-Determinants">Areas and Volumes by Determinants</h3>
 </div></article></div><nav class="pagination" role="navigation" aria-label="pagination"><div class="pagination-previous"><a href="/page/51/">上一页</a></div><div class="pagination-next is-invisible is-hidden-mobile"><a href="/page/53/">下一页</a></div><ul class="pagination-list is-hidden-mobile"><li><a class="pagination-link" href="/">1</a></li><li><span class="pagination-ellipsis">&hellip;</span></li><li><a class="pagination-link" href="/page/51/">51</a></li><li><a class="pagination-link is-current" href="/page/52/">52</a></li></ul></nav></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/dark_souls.jpg" alt="Ligh0x74"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">Ligh0x74</p><p class="is-size-6 is-block">Developer</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Earth, Solar System</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">155</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">35</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">3</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/Ligh0x74" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Ligh0x74"><i class="fab fa-github"></i></a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://ppoffice.github.io/hexo-theme-icarus/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">ICARUS</span></span><span class="level-right"><span class="level-item tag">ppoffice.github.io</span></span></a></li><li><a class="level is-mobile" href="https://waline.js.org" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Waline</span></span><span class="level-right"><span class="level-item tag">waline.js.org</span></span></a></li><li><a class="level is-mobile" href="https://vercel.com" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Vercel</span></span><span class="level-right"><span class="level-item tag">vercel.com</span></span></a></li></ul></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/"><span class="level-start"><span class="level-item">书籍</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/"><span class="level-start"><span class="level-item">CSAPP/OSTEP</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/DDIA/"><span class="level-start"><span class="level-item">DDIA</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">基础</span></span><span class="level-end"><span class="level-item tag">9</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E6%95%B0%E5%AD%A6/"><span class="level-start"><span class="level-item">数学</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E6%A8%A1%E6%9D%BF/"><span class="level-start"><span class="level-item">模板</span></span><span class="level-end"><span class="level-item tag">7</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E7%B3%BB%E7%BB%9F/"><span class="level-start"><span class="level-item">系统</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E5%AE%89%E5%85%A8/"><span class="level-start"><span class="level-item">安全</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">3</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/"><span class="level-start"><span class="level-item">MySQL</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/OceanBase/"><span class="level-start"><span class="level-item">OceanBase</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/Redis/"><span class="level-start"><span class="level-item">Redis</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"><span class="level-start"><span class="level-item">消息队列</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/Kafka/"><span class="level-start"><span class="level-item">Kafka</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/"><span class="level-start"><span class="level-item">算法</span></span><span class="level-end"><span class="level-item tag">88</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/AtCoder/"><span class="level-start"><span class="level-item">AtCoder</span></span><span class="level-end"><span class="level-item tag">16</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/Codeforces/"><span class="level-start"><span class="level-item">Codeforces</span></span><span class="level-end"><span class="level-item tag">34</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/LeetCode/"><span class="level-start"><span class="level-item">LeetCode</span></span><span class="level-end"><span class="level-item tag">38</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><span class="level-start"><span class="level-item">设计模式</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">14</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/C/"><span class="level-start"><span class="level-item">C++</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Go/"><span class="level-start"><span class="level-item">Go</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Java/"><span class="level-start"><span class="level-item">Java</span></span><span class="level-end"><span class="level-item tag">9</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Python/"><span class="level-start"><span class="level-item">Python</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Rust/"><span class="level-start"><span class="level-item">Rust</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/"><span class="level-start"><span class="level-item">课程</span></span><span class="level-end"><span class="level-item tag">28</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/"><span class="level-start"><span class="level-item">CMU 15-445</span></span><span class="level-end"><span class="level-item tag">8</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/"><span class="level-start"><span class="level-item">GAMES101</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/"><span class="level-start"><span class="level-item">MIT 6.824</span></span><span class="level-end"><span class="level-item tag">14</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-ICS-OS/"><span class="level-start"><span class="level-item">NJU ICS/OS</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/"><span class="level-start"><span class="level-item">NJU Static Analysis</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/UCB-CS61A/"><span class="level-start"><span class="level-item">UCB CS61A</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E9%A1%B9%E7%9B%AE/"><span class="level-start"><span class="level-item">项目</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E9%A1%B9%E7%9B%AE/Mini-LSM/"><span class="level-start"><span class="level-item">Mini-LSM</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-05-14T12:42:16.492Z">2025-05-14</time></p><p class="title"><a href="/2025/05/14/System%20Design/">System Design（草稿）</a></p><p class="categories"><a href="/categories/%E5%9F%BA%E7%A1%80/">基础</a> / <a href="/categories/%E5%9F%BA%E7%A1%80/%E7%B3%BB%E7%BB%9F/">系统</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-04-26T00:11:50.404Z">2025-04-26</time></p><p class="title"><a href="/2025/04/26/LSM%20in%20a%20Week/">LSM in a Week</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a> / <a href="/categories/%E9%A1%B9%E7%9B%AE/Mini-LSM/">Mini-LSM</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-04-18T10:01:46.499Z">2025-04-18</time></p><p class="title"><a href="/2025/04/18/Guava%20RateLimiter/">Guava RateLimiter</a></p><p class="categories"><a href="/categories/%E8%AF%AD%E8%A8%80/">语言</a> / <a href="/categories/%E8%AF%AD%E8%A8%80/Java/">Java</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-04-17T16:42:59.185Z">2025-04-18</time></p><p class="title"><a href="/2025/04/18/CMU%2015-445645%20%E2%80%94%20Fall%202024%20Projects/">CMU 15-445/645 — Fall 2024 Projects</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/">CMU 15-445</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-03-26T13:03:18.733Z">2025-03-26</time></p><p class="title"><a href="/2025/03/26/Kafka/">Kafka 4.0（草稿）</a></p><p class="categories"><a href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a> / <a href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/Kafka/">Kafka</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2025/"><span class="level-start"><span class="level-item">2025</span></span><span class="level-end"><span class="level-item tag">11</span></span></a></li><li><a class="level is-mobile" href="/archives/2024/"><span class="level-start"><span class="level-item">2024</span></span><span class="level-end"><span class="level-item tag">44</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/"><span class="level-start"><span class="level-item">2023</span></span><span class="level-end"><span class="level-item tag">100</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Debugging/"><span class="tag">Debugging</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Draft/"><span class="tag">Draft</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hexo/"><span class="tag">Hexo</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="http://47.96.68.192/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Lc-Predictor</span></span><span class="level-right"><span class="level-item tag">47.96.68.192</span></span></a></li></ul></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2025 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
             article: {
                 highlight: {
