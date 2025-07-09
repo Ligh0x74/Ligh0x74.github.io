@@ -652,7 +652,8 @@ $$
 $$
 </div>
 <h3 id="Part-B-Vector-Fields-and-Line-Integrals">Part B: Vector Fields and Line Integrals</h3>
-</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-12-31T16:00:00.000Z" title="2023/1/1 00:00:00">2023-01-01</time>发表</span><span class="level-item"><time dateTime="2025-07-05T11:28:51.012Z" title="2025/7/5 19:28:51">2025-07-05</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a><span> / </span><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/%E6%95%B0%E5%AD%A6/">数学</a></span><span class="level-item">16 分钟读完 (大约2333个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2023/01/01/Introduction%20to%20Probability/">Introduction to Probability</a></p><div class="content"><p>参考 <a target="_blank" rel="noopener" href="http://www.athenasc.com/probbook.html">Introduction to Probability</a>，<a target="_blank" rel="noopener" href="https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/">MIT 6.041SC FALL 2013</a>，<a target="_blank" rel="noopener" href="http://www.wzchen.com/probability-cheatsheet/">Probability Cheatsheet</a>。</p>
+</div></article></div><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-12-31T16:00:00.000Z" title="2023/1/1 00:00:00">2023-01-01</time>发表</span><span class="level-item"><time dateTime="2025-07-09T09:57:30.895Z" title="2025/7/9 17:57:30">2025-07-09</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a><span> / </span><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/%E6%95%B0%E5%AD%A6/">数学</a></span><span class="level-item">24 分钟读完 (大约3536个字)</span></div></div><p class="title is-3 is-size-4-mobile"><a class="link-muted" href="/2023/01/01/Introduction%20to%20Probability/">Introduction to Probability</a></p><div class="content"><h1>Introduction to Probability</h1>
+<p>参考 <a target="_blank" rel="noopener" href="http://www.athenasc.com/probbook.html">Introduction to Probability</a>，<a target="_blank" rel="noopener" href="https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/">MIT 6.041SC FALL 2013</a>，<a target="_blank" rel="noopener" href="http://www.wzchen.com/probability-cheatsheet/">Probability Cheatsheet</a>。</p>
 <h2 id="Unit-I-Probability-Models-And-Discrete-Random-Variables">Unit I: Probability Models And Discrete Random Variables</h2>
 <h3 id="Lecture-2-Conditioning-and-Bayes’-Rule">Lecture 2: Conditioning and Bayes’ Rule</h3>
 <p>条件概率 \(P(A \mid B)\) 表示在 \(B\) 发生的前提下 \(A\) 发生的概率，此时 \(B\) 作为全集，\(A\) 在 \(B\) 中的占比就是该条件概率的值。如果乘以 \(P(B)\) 就是将 \(\Omega\) 作为全集，自然会得到 \(P(A \cap B)\)。反之， 将 \(P(A \cap B)\) 除以 \(P(B)\) 就是将全集 \(\Omega\) 缩减为 \(B\)，从而得到条件概率 \(P(A \mid B)\)，此时要求 \(P(B) \neq 0\)。</p>
@@ -741,7 +742,7 @@ E[x] = p \cdot 1 + (1 - p) \cdot (E[X] + 1) \rightarrow
 E[x] = \frac{1}{p}
 $$
 </div>
-<p>随机变量 \(X\) 和 \(Y\) 的联合概率质量函数为 \(p_{X, Y}(x, y) = P(X = x, Y = y)\)，满足以下性质。可以通过联合 PMF 得到单个随机变量的边缘 PMF，条件 PMF 表示在 \(Y = y\) 的前提下 \(X = x\) 的概率，除以 \(p_{Y}(y)\) 将全集缩减到 \(Y = y\) 的情况。条件 PMF 和普通 PMF 相同，概率求和得到 \(1\)。</p>
+<p>随机变量 \(X\) 和 \(Y\) 的联合 PMF 为 \(p_{X, Y}(x, y) = P(X = x, Y = y)\)，满足以下性质。可以通过联合 PMF 得到单个随机变量的边缘 PMF，条件 PMF 表示在 \(Y = y\) 的前提下 \(X = x\) 的概率，除以 \(p_{Y}(y)\) 将全集缩减到 \(Y = y\) 的情况。条件 PMF 和普通 PMF 相同，概率求和得到 \(1\)。</p>
 <div>
 $$
 \sum_{x}\sum_{y}p_{X, Y}(x, y) = 1,\
@@ -786,7 +787,7 @@ $$
 </div>
 <h2 id="Unit-II-General-Random-Variables">Unit II: General Random Variables</h2>
 <h3 id="Lecture-8-Continuous-Random-Variables">Lecture 8: Continuous Random Variables</h3>
-<p>连续型随机变量由概率密度函数（PDF）\(f_{X}\) 描述，密度（函数值）不是概率，该函数和 \(x\) 轴围城的面积才是概率。和 PMF 不同，PDF 在某点的概率总是零，因为面积是零。连续型和离散型随机变量的累积分布函数（CDF）\(F(x)\) 如下所示，连续型随机变量的 CDF 的导数等于密度，即密度是 CDF 的变化率。</p>
+<p>连续型随机变量由概率密度函数（PDF）\(f_{X}\) 描述，密度（函数值）不是概率，该函数和 \(x\) 轴围成的面积才是概率。和 PMF 不同，PDF 在某点的概率总是零，因为面积是零。连续型和离散型随机变量的累积分布函数（CDF）\(F(x)\) 如下所示，连续型随机变量的 CDF 的导数等于密度，即密度是 CDF 的变化率。</p>
 <div>
 $$
 P(a \leq X \leq b) = \int_{a}^{b}f_{X}(x)dx,\
@@ -840,6 +841,160 @@ Y \sim N(a\mu + b, a^{2}\sigma^{2})
 $$
 </div>
 <h3 id="Lecture-9-Multiple-Continuous-Random-Variables">Lecture 9: Multiple Continuous Random Variables</h3>
+<p>随机变量 \(X\) 和 \(Y\) 的联合 PDF、期望、边缘 PDF 和条件 PDF 如下，联合 PDF 表示的曲顶柱体的体积就是概率，在整个曲面下的体积 \(\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}f_{X, Y} = 1\)，密度 \(f_{X, Y} \geq 0\)。将前提 \(y\) 视为常量，条件 PDF 可以看作联合 PDF 的切片。</p>
+<div>
+$$
+P((X, Y) \in S) = \int\int_{S}f_{X, Y}(x, y)dxdy,\
+P(x \leq X \leq x + \delta, y \leq Y \leq y + \delta) \approx f_{X, Y}(x, y) \cdot \delta^{2}
+$$
+</div>
+<div>
+$$
+E[g(X, Y)] = \int_{-\infty}^{\infty}\int_{-\infty}^{\infty}g(x, y)f_{X, Y}(x, y)dxdy
+$$
+</div>
+<div>
+$$
+f_{X}(x) \cdot \delta \approx P(x \leq X \leq x + \delta)
+= \int_{-\infty}^{\infty}\int_{x}^{x + \delta}f_{X, Y}(x, y)dxdy
+\approx \int_{-\infty}^{\infty}\delta \cdot f_{X, Y}(x, y)dy \rightarrow
+f_{X}(x) = \int_{-\infty}^{\infty}f_{X, Y}(x, y)dy
+$$
+</div>
+<div>
+$$
+f_{X \mid Y}(x \mid y) = \frac{f_{X, Y}(x, y)}{f_{Y}(y)} \quad (f_{Y}(y) \gt 0)
+$$
+</div>
+<div>
+$$
+f_{X, Y}(x, y) = f_{X}(x)f_{Y}(y),\
+f_{X \mid Y}(x \mid y) = f_{X}(x) \quad (X, Y \text{ are independent})
+$$
+</div>
+<p><img src="/img/Math.assets/1751878580486.png" alt=""></p>
+<p>Buffon’s needle 问题：有两条距离为 \(d\) 的平行线，以及长度为 \(l\) 的针（\(l \lt d\)），求针和直线相交的概率。取随机变量 \(X\) 表示针的中点到两条平行线的最短距离，随机变量 \(\Theta\) 表示针和直线的夹角（锐角）。假设 \(X\) 和 \(\Theta\) 服从均匀分布且相互独立，则联合 PDF 公式如下。由于针和直线在 \(X \leq \frac{l}{2}\sin\Theta\) 时相交，所以相交的概率为 \(P(X \leq \frac{l}{2}\sin\Theta) = \frac{2l}{\pi d}\)。</p>
+<div>
+$$
+f_{X, \Theta}(x, \theta)
+= f_{X}(x)f_{\Theta}(\theta)
+= \frac{2}{d}\frac{2}{\pi}
+\quad (0 \leq x \leq d / 2, 0 \leq \theta \leq \pi / 2)
+$$
+</div>
+<div>
+$$
+P(X \leq \frac{l}{2}\sin\Theta)
+= \int\int_{x \leq \frac{l}{2}\sin\theta}f_{X}(x)f_{\Theta}(\theta)dxd\theta
+= \frac{4}{\pi d}\int_{0}^{\pi / 2}\int_{0}^{(l /2)\sin\theta}dxd\theta
+= \frac{2l}{\pi d}
+$$
+</div>
+<h3 id="Lecture-10-Continuous-Bayes’-Rule-Derived-Distributions">Lecture 10: Continuous Bayes’ Rule; Derived Distributions</h3>
+<div>
+$$
+p_{X \mid Y}(x \mid y)
+= \frac{p_{X, Y}(x, y)}{p_{Y}(y)}
+= \frac{p_{X}(x)p_{Y \mid X}(y \mid x)}{p_{Y}(y)},\
+p_{Y}(y) = \sum_{x}p_{X}(x)p_{Y \mid X}(y \mid x)
+$$
+</div>
+<div>
+$$
+f_{X \mid Y}(x \mid y)
+= \frac{f_{X, Y}(x, y)}{f_{Y}(y)}
+= \frac{f_{X}(x)f_{Y \mid X}(y \mid x)}{f_{Y}(y)},\
+f_{Y}(y) = \int_{x}f_{X}(x)f_{Y \mid X}(y \mid x)dx
+$$
+</div>
+<div>
+$$
+p_{X \mid Y}(x \mid y)
+= \frac{p_{X}(x)f_{Y \mid X}(y \mid x)}{f_{Y}(y)},\
+f_{Y}(y) = \sum_{x}p_{X}(x)f_{Y \mid X}(y \mid x)
+$$
+</div>
+<div>
+$$
+f_{X \mid Y}(x \mid y)
+= \frac{f_{X}(x)p_{Y \mid X}(y \mid x)}{f_{Y}(y)},\
+p_{Y}(y) = \int_{x}f_{X}(x)p_{Y \mid X}(y \mid x)dx
+$$
+</div>
+<p>对于离散型随机变量 \(X\)，已知 \(X\) 的 PMF，则 \(Y = g(X)\) 的 PMF 如下。对于连续型随机变量 \(X\)，已知 \(X\) 的 PDF，则 \(Y = g(X)\) 的 PDF 如下。可以使用以下公式证明，正态随机变量的线性函数仍服从正态分布。</p>
+<div>
+$$
+p_{Y}(y) = P(g(X) = y) = \sum_{x: g(x) = y}p_{X}(x)
+$$
+</div>
+<div>
+$$
+F_{Y}(y) = P(Y \leq y),\
+f_{Y}(y) = \frac{dF_{Y}}{dy}(y) \rightarrow
+Y = aX + b,\
+f_{Y}(y) = \frac{1}{|a|}f_{X}(\frac{y - b}{a})
+$$
+</div>
+<h3 id="Lecture-11-Derived-Distributions-Convolution-Covariance-and-Correlation">Lecture 11: Derived Distributions; Convolution; Covariance and Correlation</h3>
+<p>如果 \(Y = g(X)\) 且函数 \(g\) 严格单调递增，则随机变量 \(X\) 和 \(Y\) 的 PMF 满足以下关系。如果 \(W = X + Y\) 且 \(X\) 和 \(Y\) 独立，则有如下卷积公式 \(p_{W}(w)\) 和 \(f_{W}(w)\)，分别对应离散和连续情况。可以使用卷积公式证明，独立的正态随机变量之和仍服从正态分布。</p>
+<div>
+$$
+P(\ x \leq X \leq x + \delta) = P(g(x) \leq Y \leq g(x + \delta) \approx g(x) + \delta|\frac{dg}{dx}(x)|) \rightarrow
+\delta f_{X}(x) = \delta \left|\frac{dg}{dx}(x)\right|f_{Y}(y)
+$$
+</div>
+<div>
+$$
+p_{W}(w) = \sum_{x}P_{X}(x)p_{Y}(w - x),\
+f_{W}(w) = \int_{-\infty}^{\infty}f_{X}(x)f_{Y}(w - x)
+$$
+</div>
+<p><img src="/img/Math.assets/1752026105461.png" alt=""></p>
+<p>协方差大于零说明 \(X\) 和 \(Y\) 成正相关，小于零说明成负相关。如果 \(X\) 和 \(Y\) 独立，则协方差为零，反之不一定成立。类似方差和标准差，为消除单位的影响，提出相关系数 \(\rho\) 的概念，表示变量之间的关联程度。</p>
+<div>
+$$
+\DeclareMathOperator{\cov}{cov}
+\cov(X, Y) = E\left[(X - E[X]) \cdot (Y - E[Y])\right]
+$$
+</div>
+<div>
+$$
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\cov(X, X) = \var(X),\
+\cov(X, Y) = E[XY] - E[X]E[Y],\
+\var\left(\sum_{i = 1}^{n}X_{i}\right) = \sum_{i = 1}^{n}\var(X_{i}) + \sum_{(i, j): i \neq j}\cov(X_{i}, X_{j})
+$$
+</div>
+<div>
+$$
+\DeclareMathOperator{\cov}{cov}
+\rho = \frac{\cov(X, Y)}{\sigma_{X}\sigma_{Y}},\
+-1 \leq \rho \leq 1
+$$
+</div>
+<div>
+$$
+|\rho| = 1 \iff (X - E[X]) = c(Y - E[Y])
+$$
+</div>
+<h3 id="Lecture-12-Iterated-Expectations-Sum-of-a-Random-Number-of-Random-Variables">Lecture 12: Iterated Expectations; Sum of a Random Number of Random Variables</h3>
+<div>
+$$
+\DeclareMathOperator{\var}{var}
+E[E[X \mid Y]] = \sum_{y}E[X \mid Y = y]p_{Y}(y) = E[X],\
+\var(X) = E[\var(X \mid Y)] + \var(E[X \mid Y])
+$$
+</div>
+<div>
+$$
+\DeclareMathOperator{\var}{var}
+Y = \sum_{i = 1}^{N}X_{i},\
+E[Y] = E[E[Y \mid N]] = E[NE[X]] = E[N]E[X],\
+\var(Y) = E[\var(Y \mid N)] + \var(E[Y \mid N]) = E[N]\var(X) + (E[X])^{2}\var(N)
+$$
+</div>
+<h2 id="Unit-IV-Laws-Of-Large-Numbers-And-Inference">Unit IV: Laws Of Large Numbers And Inference</h2>
 </div></article></div><nav class="pagination" role="navigation" aria-label="pagination"><div class="pagination-previous"><a href="/categories/%E5%9F%BA%E7%A1%80/page/3/">上一页</a></div><div class="pagination-next is-invisible is-hidden-mobile"><a href="/categories/%E5%9F%BA%E7%A1%80/page/5/">下一页</a></div><ul class="pagination-list is-hidden-mobile"><li><a class="pagination-link" href="/categories/%E5%9F%BA%E7%A1%80/">1</a></li><li><a class="pagination-link" href="/categories/%E5%9F%BA%E7%A1%80/page/2/">2</a></li><li><a class="pagination-link" href="/categories/%E5%9F%BA%E7%A1%80/page/3/">3</a></li><li><a class="pagination-link is-current" href="/categories/%E5%9F%BA%E7%A1%80/page/4/">4</a></li></ul></nav></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/dark_souls.jpg" alt="Ligh0x74"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">Ligh0x74</p><p class="is-size-6 is-block">Developer</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>Earth, Solar System</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">157</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">35</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">3</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/Ligh0x74" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Ligh0x74"><i class="fab fa-github"></i></a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://ppoffice.github.io/hexo-theme-icarus/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">ICARUS</span></span><span class="level-right"><span class="level-item tag">ppoffice.github.io</span></span></a></li><li><a class="level is-mobile" href="https://waline.js.org" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Waline</span></span><span class="level-right"><span class="level-item tag">waline.js.org</span></span></a></li><li><a class="level is-mobile" href="https://vercel.com" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Vercel</span></span><span class="level-right"><span class="level-item tag">vercel.com</span></span></a></li></ul></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/"><span class="level-start"><span class="level-item">书籍</span></span><span class="level-end"><span class="level-item tag">6</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/CSAPP-OSTEP/"><span class="level-start"><span class="level-item">CSAPP/OSTEP</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E4%B9%A6%E7%B1%8D/DDIA/"><span class="level-start"><span class="level-item">DDIA</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">基础</span></span><span class="level-end"><span class="level-item tag">11</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E6%95%B0%E5%AD%A6/"><span class="level-start"><span class="level-item">数学</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E6%A8%A1%E6%9D%BF/"><span class="level-start"><span class="level-item">模板</span></span><span class="level-end"><span class="level-item tag">7</span></span></a></li><li><a class="level is-mobile" href="/categories/%E5%9F%BA%E7%A1%80/%E7%B3%BB%E7%BB%9F/"><span class="level-start"><span class="level-item">系统</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E5%AE%89%E5%85%A8/"><span class="level-start"><span class="level-item">安全</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">3</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/MySQL/"><span class="level-start"><span class="level-item">MySQL</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/OceanBase/"><span class="level-start"><span class="level-item">OceanBase</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/Redis/"><span class="level-start"><span class="level-item">Redis</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"><span class="level-start"><span class="level-item">消息队列</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/Kafka/"><span class="level-start"><span class="level-item">Kafka</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/"><span class="level-start"><span class="level-item">算法</span></span><span class="level-end"><span class="level-item tag">88</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/AtCoder/"><span class="level-start"><span class="level-item">AtCoder</span></span><span class="level-end"><span class="level-item tag">16</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/Codeforces/"><span class="level-start"><span class="level-item">Codeforces</span></span><span class="level-end"><span class="level-item tag">34</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95/LeetCode/"><span class="level-start"><span class="level-item">LeetCode</span></span><span class="level-end"><span class="level-item tag">38</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><span class="level-start"><span class="level-item">设计模式</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">14</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/C/"><span class="level-start"><span class="level-item">C++</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Go/"><span class="level-start"><span class="level-item">Go</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Java/"><span class="level-start"><span class="level-item">Java</span></span><span class="level-end"><span class="level-item tag">9</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Python/"><span class="level-start"><span class="level-item">Python</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/Rust/"><span class="level-start"><span class="level-item">Rust</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/"><span class="level-start"><span class="level-item">课程</span></span><span class="level-end"><span class="level-item tag">28</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/"><span class="level-start"><span class="level-item">CMU 15-445</span></span><span class="level-end"><span class="level-item tag">8</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/GAMES101/"><span class="level-start"><span class="level-item">GAMES101</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/MIT-6-824/"><span class="level-start"><span class="level-item">MIT 6.824</span></span><span class="level-end"><span class="level-item tag">14</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-ICS-OS/"><span class="level-start"><span class="level-item">NJU ICS/OS</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/NJU-Static-Analysis/"><span class="level-start"><span class="level-item">NJU Static Analysis</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%BE%E7%A8%8B/UCB-CS61A/"><span class="level-start"><span class="level-item">UCB CS61A</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E9%A1%B9%E7%9B%AE/"><span class="level-start"><span class="level-item">项目</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E9%A1%B9%E7%9B%AE/Mini-LSM/"><span class="level-start"><span class="level-item">Mini-LSM</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-05-14T12:42:16.492Z">2025-05-14</time></p><p class="title"><a href="/2025/05/14/System%20Design/">System Design（草稿）</a></p><p class="categories"><a href="/categories/%E5%9F%BA%E7%A1%80/">基础</a> / <a href="/categories/%E5%9F%BA%E7%A1%80/%E7%B3%BB%E7%BB%9F/">系统</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-04-26T00:11:50.404Z">2025-04-26</time></p><p class="title"><a href="/2025/04/26/LSM%20in%20a%20Week/">LSM in a Week</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a> / <a href="/categories/%E9%A1%B9%E7%9B%AE/Mini-LSM/">Mini-LSM</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-04-18T10:01:46.499Z">2025-04-18</time></p><p class="title"><a href="/2025/04/18/Guava%20RateLimiter/">Guava RateLimiter</a></p><p class="categories"><a href="/categories/%E8%AF%AD%E8%A8%80/">语言</a> / <a href="/categories/%E8%AF%AD%E8%A8%80/Java/">Java</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-04-17T16:42:59.185Z">2025-04-18</time></p><p class="title"><a href="/2025/04/18/CMU%2015-445645%20%E2%80%94%20Fall%202024%20Projects/">CMU 15-445/645 — Fall 2024 Projects</a></p><p class="categories"><a href="/categories/%E8%AF%BE%E7%A8%8B/">课程</a> / <a href="/categories/%E8%AF%BE%E7%A8%8B/CMU-15-445/">CMU 15-445</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2025-03-26T13:03:18.733Z">2025-03-26</time></p><p class="title"><a href="/2025/03/26/Kafka/">Kafka 4.0（草稿）</a></p><p class="categories"><a href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a> / <a href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/Kafka/">Kafka</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2025/"><span class="level-start"><span class="level-item">2025</span></span><span class="level-end"><span class="level-item tag">11</span></span></a></li><li><a class="level is-mobile" href="/archives/2024/"><span class="level-start"><span class="level-item">2024</span></span><span class="level-end"><span class="level-item tag">44</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/"><span class="level-start"><span class="level-item">2023</span></span><span class="level-end"><span class="level-item tag">102</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Debugging/"><span class="tag">Debugging</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Draft/"><span class="tag">Draft</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hexo/"><span class="tag">Hexo</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="http://47.96.68.192/" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Lc-Predictor</span></span><span class="level-right"><span class="level-item tag">47.96.68.192</span></span></a></li></ul></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2025 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
             article: {
                 highlight: {

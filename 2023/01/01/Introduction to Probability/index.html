@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Introduction to Probability - Ligh0x74&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Ligh0x74&#039;s Blog"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ligh0x74&#039;s Blog"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="参考 Introduction to Probability，MIT 6.041SC FALL 2013，Probability Cheatsheet。 Unit I: Probability Models And Discrete Random Variables Lecture 2: Conditioning and Bayes’ Rule 条件概率 \(P(A \mid B)\) 表示在 \"><meta property="og:type" content="blog"><meta property="og:title" content="Introduction to Probability"><meta property="og:url" content="https://ligh0x74.github.io/2023/01/01/Introduction%20to%20Probability/"><meta property="og:site_name" content="Ligh0x74&#039;s Blog"><meta property="og:description" content="参考 Introduction to Probability，MIT 6.041SC FALL 2013，Probability Cheatsheet。 Unit I: Probability Models And Discrete Random Variables Lecture 2: Conditioning and Bayes’ Rule 条件概率 \(P(A \mid B)\) 表示在 \"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://ligh0x74.github.io/img/Math.assets/1751531335840.png"><meta property="og:image" content="https://ligh0x74.github.io/img/Math.assets/1751685942801.png"><meta property="article:published_time" content="2022-12-31T16:00:00.000Z"><meta property="article:modified_time" content="2025-07-05T11:28:51.012Z"><meta property="article:author" content="Ligh0x74"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://ligh0x74.github.io/img/Math.assets/1751531335840.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://ligh0x74.github.io/2023/01/01/Introduction%20to%20Probability/"},"headline":"Introduction to Probability","image":["https://ligh0x74.github.io/img/Math.assets/1751531335840.png","https://ligh0x74.github.io/img/Math.assets/1751685942801.png"],"datePublished":"2022-12-31T16:00:00.000Z","dateModified":"2025-07-05T11:28:51.012Z","author":{"@type":"Person","name":"Ligh0x74"},"publisher":{"@type":"Organization","name":"Ligh0x74's Blog","logo":{"@type":"ImageObject","url":"https://ligh0x74.github.io/img/logo.svg"}},"description":"参考 Introduction to Probability，MIT 6.041SC FALL 2013，Probability Cheatsheet。 Unit I: Probability Models And Discrete Random Variables Lecture 2: Conditioning and Bayes’ Rule 条件概率 \\(P(A \\mid B)\\) 表示在 \\"}</script><link rel="canonical" href="https://ligh0x74.github.io/2023/01/01/Introduction%20to%20Probability/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/monokai.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;600&amp;family=Roboto+Mono"><link rel="stylesheet" href="/css/cyberpunk.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- hexo injector head_end start --><script>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Introduction to Probability - Ligh0x74&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Ligh0x74&#039;s Blog"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ligh0x74&#039;s Blog"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="Introduction to Probability 参考 Introduction to Probability，MIT 6.041SC FALL 2013，Probability Cheatsheet。 Unit I: Probability Models And Discrete Random Variables Lecture 2: Conditioning and Bayes’ Rul"><meta property="og:type" content="blog"><meta property="og:title" content="Introduction to Probability"><meta property="og:url" content="https://ligh0x74.github.io/2023/01/01/Introduction%20to%20Probability/"><meta property="og:site_name" content="Ligh0x74&#039;s Blog"><meta property="og:description" content="Introduction to Probability 参考 Introduction to Probability，MIT 6.041SC FALL 2013，Probability Cheatsheet。 Unit I: Probability Models And Discrete Random Variables Lecture 2: Conditioning and Bayes’ Rul"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://ligh0x74.github.io/img/Math.assets/1751531335840.png"><meta property="og:image" content="https://ligh0x74.github.io/img/Math.assets/1751685942801.png"><meta property="og:image" content="https://ligh0x74.github.io/img/Math.assets/1751878580486.png"><meta property="og:image" content="https://ligh0x74.github.io/img/Math.assets/1752026105461.png"><meta property="article:published_time" content="2022-12-31T16:00:00.000Z"><meta property="article:modified_time" content="2025-07-09T09:57:30.895Z"><meta property="article:author" content="Ligh0x74"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://ligh0x74.github.io/img/Math.assets/1751531335840.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://ligh0x74.github.io/2023/01/01/Introduction%20to%20Probability/"},"headline":"Introduction to Probability","image":["https://ligh0x74.github.io/img/Math.assets/1751531335840.png","https://ligh0x74.github.io/img/Math.assets/1751685942801.png","https://ligh0x74.github.io/img/Math.assets/1751878580486.png","https://ligh0x74.github.io/img/Math.assets/1752026105461.png"],"datePublished":"2022-12-31T16:00:00.000Z","dateModified":"2025-07-09T09:57:30.895Z","author":{"@type":"Person","name":"Ligh0x74"},"publisher":{"@type":"Organization","name":"Ligh0x74's Blog","logo":{"@type":"ImageObject","url":"https://ligh0x74.github.io/img/logo.svg"}},"description":"Introduction to Probability 参考 Introduction to Probability，MIT 6.041SC FALL 2013，Probability Cheatsheet。 Unit I: Probability Models And Discrete Random Variables Lecture 2: Conditioning and Bayes’ Rul"}</script><link rel="canonical" href="https://ligh0x74.github.io/2023/01/01/Introduction%20to%20Probability/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/monokai.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;600&amp;family=Roboto+Mono"><link rel="stylesheet" href="/css/cyberpunk.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- hexo injector head_end start --><script>
   (function () {
       function switchTab() {
           if (!location.hash) {
@@ -29,7 +29,8 @@
       switchTab();
       window.addEventListener('hashchange', switchTab, false);
   })();
-  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/links">Links</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-12-31T16:00:00.000Z" title="2023/1/1 00:00:00">2023-01-01</time>发表</span><span class="level-item"><time dateTime="2025-07-05T11:28:51.012Z" title="2025/7/5 19:28:51">2025-07-05</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a><span> / </span><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/%E6%95%B0%E5%AD%A6/">数学</a></span><span class="level-item">16 分钟读完 (大约2333个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">Introduction to Probability</h1><div class="content"><p>参考 <a target="_blank" rel="noopener" href="http://www.athenasc.com/probbook.html">Introduction to Probability</a>，<a target="_blank" rel="noopener" href="https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/">MIT 6.041SC FALL 2013</a>，<a target="_blank" rel="noopener" href="http://www.wzchen.com/probability-cheatsheet/">Probability Cheatsheet</a>。</p>
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/links">Links</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-12-31T16:00:00.000Z" title="2023/1/1 00:00:00">2023-01-01</time>发表</span><span class="level-item"><time dateTime="2025-07-09T09:57:30.895Z" title="2025/7/9 17:57:30">2025-07-09</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a><span> / </span><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/%E6%95%B0%E5%AD%A6/">数学</a></span><span class="level-item">24 分钟读完 (大约3536个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">Introduction to Probability</h1><div class="content"><h1>Introduction to Probability</h1>
+<p>参考 <a target="_blank" rel="noopener" href="http://www.athenasc.com/probbook.html">Introduction to Probability</a>，<a target="_blank" rel="noopener" href="https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/">MIT 6.041SC FALL 2013</a>，<a target="_blank" rel="noopener" href="http://www.wzchen.com/probability-cheatsheet/">Probability Cheatsheet</a>。</p>
 <h2 id="Unit-I-Probability-Models-And-Discrete-Random-Variables">Unit I: Probability Models And Discrete Random Variables</h2>
 <h3 id="Lecture-2-Conditioning-and-Bayes’-Rule">Lecture 2: Conditioning and Bayes’ Rule</h3>
 <p>条件概率 \(P(A \mid B)\) 表示在 \(B\) 发生的前提下 \(A\) 发生的概率，此时 \(B\) 作为全集，\(A\) 在 \(B\) 中的占比就是该条件概率的值。如果乘以 \(P(B)\) 就是将 \(\Omega\) 作为全集，自然会得到 \(P(A \cap B)\)。反之， 将 \(P(A \cap B)\) 除以 \(P(B)\) 就是将全集 \(\Omega\) 缩减为 \(B\)，从而得到条件概率 \(P(A \mid B)\)，此时要求 \(P(B) \neq 0\)。</p>
@@ -118,7 +119,7 @@ E[x] = p \cdot 1 + (1 - p) \cdot (E[X] + 1) \rightarrow
 E[x] = \frac{1}{p}
 $$
 </div>
-<p>随机变量 \(X\) 和 \(Y\) 的联合概率质量函数为 \(p_{X, Y}(x, y) = P(X = x, Y = y)\)，满足以下性质。可以通过联合 PMF 得到单个随机变量的边缘 PMF，条件 PMF 表示在 \(Y = y\) 的前提下 \(X = x\) 的概率，除以 \(p_{Y}(y)\) 将全集缩减到 \(Y = y\) 的情况。条件 PMF 和普通 PMF 相同，概率求和得到 \(1\)。</p>
+<p>随机变量 \(X\) 和 \(Y\) 的联合 PMF 为 \(p_{X, Y}(x, y) = P(X = x, Y = y)\)，满足以下性质。可以通过联合 PMF 得到单个随机变量的边缘 PMF，条件 PMF 表示在 \(Y = y\) 的前提下 \(X = x\) 的概率，除以 \(p_{Y}(y)\) 将全集缩减到 \(Y = y\) 的情况。条件 PMF 和普通 PMF 相同，概率求和得到 \(1\)。</p>
 <div>
 $$
 \sum_{x}\sum_{y}p_{X, Y}(x, y) = 1,\
@@ -163,7 +164,7 @@ $$
 </div>
 <h2 id="Unit-II-General-Random-Variables">Unit II: General Random Variables</h2>
 <h3 id="Lecture-8-Continuous-Random-Variables">Lecture 8: Continuous Random Variables</h3>
-<p>连续型随机变量由概率密度函数（PDF）\(f_{X}\) 描述，密度（函数值）不是概率，该函数和 \(x\) 轴围城的面积才是概率。和 PMF 不同，PDF 在某点的概率总是零，因为面积是零。连续型和离散型随机变量的累积分布函数（CDF）\(F(x)\) 如下所示，连续型随机变量的 CDF 的导数等于密度，即密度是 CDF 的变化率。</p>
+<p>连续型随机变量由概率密度函数（PDF）\(f_{X}\) 描述，密度（函数值）不是概率，该函数和 \(x\) 轴围成的面积才是概率。和 PMF 不同，PDF 在某点的概率总是零，因为面积是零。连续型和离散型随机变量的累积分布函数（CDF）\(F(x)\) 如下所示，连续型随机变量的 CDF 的导数等于密度，即密度是 CDF 的变化率。</p>
 <div>
 $$
 P(a \leq X \leq b) = \int_{a}^{b}f_{X}(x)dx,\
@@ -217,7 +218,161 @@ Y \sim N(a\mu + b, a^{2}\sigma^{2})
 $$
 </div>
 <h3 id="Lecture-9-Multiple-Continuous-Random-Variables">Lecture 9: Multiple Continuous Random Variables</h3>
-</div><div class="article-licensing box"><div class="licensing-title"><p>Introduction to Probability</p><p><a href="https://ligh0x74.github.io/2023/01/01/Introduction to Probability/">https://ligh0x74.github.io/2023/01/01/Introduction to Probability/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Ligh0x74</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2023-01-01</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2025-07-05</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a><a class="icons" rel="noopener" target="_blank" title="ShareAlike" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-sa"></i></a></p></div></div></div></div></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2023/01/01/Calculus/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">Calculus</span></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="waline-thread"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.css"><script src="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.js"></script><script>Waline.init({
+<p>随机变量 \(X\) 和 \(Y\) 的联合 PDF、期望、边缘 PDF 和条件 PDF 如下，联合 PDF 表示的曲顶柱体的体积就是概率，在整个曲面下的体积 \(\int_{-\infty}^{\infty}\int_{-\infty}^{\infty}f_{X, Y} = 1\)，密度 \(f_{X, Y} \geq 0\)。将前提 \(y\) 视为常量，条件 PDF 可以看作联合 PDF 的切片。</p>
+<div>
+$$
+P((X, Y) \in S) = \int\int_{S}f_{X, Y}(x, y)dxdy,\
+P(x \leq X \leq x + \delta, y \leq Y \leq y + \delta) \approx f_{X, Y}(x, y) \cdot \delta^{2}
+$$
+</div>
+<div>
+$$
+E[g(X, Y)] = \int_{-\infty}^{\infty}\int_{-\infty}^{\infty}g(x, y)f_{X, Y}(x, y)dxdy
+$$
+</div>
+<div>
+$$
+f_{X}(x) \cdot \delta \approx P(x \leq X \leq x + \delta)
+= \int_{-\infty}^{\infty}\int_{x}^{x + \delta}f_{X, Y}(x, y)dxdy
+\approx \int_{-\infty}^{\infty}\delta \cdot f_{X, Y}(x, y)dy \rightarrow
+f_{X}(x) = \int_{-\infty}^{\infty}f_{X, Y}(x, y)dy
+$$
+</div>
+<div>
+$$
+f_{X \mid Y}(x \mid y) = \frac{f_{X, Y}(x, y)}{f_{Y}(y)} \quad (f_{Y}(y) \gt 0)
+$$
+</div>
+<div>
+$$
+f_{X, Y}(x, y) = f_{X}(x)f_{Y}(y),\
+f_{X \mid Y}(x \mid y) = f_{X}(x) \quad (X, Y \text{ are independent})
+$$
+</div>
+<p><img src="/img/Math.assets/1751878580486.png" alt=""></p>
+<p>Buffon’s needle 问题：有两条距离为 \(d\) 的平行线，以及长度为 \(l\) 的针（\(l \lt d\)），求针和直线相交的概率。取随机变量 \(X\) 表示针的中点到两条平行线的最短距离，随机变量 \(\Theta\) 表示针和直线的夹角（锐角）。假设 \(X\) 和 \(\Theta\) 服从均匀分布且相互独立，则联合 PDF 公式如下。由于针和直线在 \(X \leq \frac{l}{2}\sin\Theta\) 时相交，所以相交的概率为 \(P(X \leq \frac{l}{2}\sin\Theta) = \frac{2l}{\pi d}\)。</p>
+<div>
+$$
+f_{X, \Theta}(x, \theta)
+= f_{X}(x)f_{\Theta}(\theta)
+= \frac{2}{d}\frac{2}{\pi}
+\quad (0 \leq x \leq d / 2, 0 \leq \theta \leq \pi / 2)
+$$
+</div>
+<div>
+$$
+P(X \leq \frac{l}{2}\sin\Theta)
+= \int\int_{x \leq \frac{l}{2}\sin\theta}f_{X}(x)f_{\Theta}(\theta)dxd\theta
+= \frac{4}{\pi d}\int_{0}^{\pi / 2}\int_{0}^{(l /2)\sin\theta}dxd\theta
+= \frac{2l}{\pi d}
+$$
+</div>
+<h3 id="Lecture-10-Continuous-Bayes’-Rule-Derived-Distributions">Lecture 10: Continuous Bayes’ Rule; Derived Distributions</h3>
+<div>
+$$
+p_{X \mid Y}(x \mid y)
+= \frac{p_{X, Y}(x, y)}{p_{Y}(y)}
+= \frac{p_{X}(x)p_{Y \mid X}(y \mid x)}{p_{Y}(y)},\
+p_{Y}(y) = \sum_{x}p_{X}(x)p_{Y \mid X}(y \mid x)
+$$
+</div>
+<div>
+$$
+f_{X \mid Y}(x \mid y)
+= \frac{f_{X, Y}(x, y)}{f_{Y}(y)}
+= \frac{f_{X}(x)f_{Y \mid X}(y \mid x)}{f_{Y}(y)},\
+f_{Y}(y) = \int_{x}f_{X}(x)f_{Y \mid X}(y \mid x)dx
+$$
+</div>
+<div>
+$$
+p_{X \mid Y}(x \mid y)
+= \frac{p_{X}(x)f_{Y \mid X}(y \mid x)}{f_{Y}(y)},\
+f_{Y}(y) = \sum_{x}p_{X}(x)f_{Y \mid X}(y \mid x)
+$$
+</div>
+<div>
+$$
+f_{X \mid Y}(x \mid y)
+= \frac{f_{X}(x)p_{Y \mid X}(y \mid x)}{f_{Y}(y)},\
+p_{Y}(y) = \int_{x}f_{X}(x)p_{Y \mid X}(y \mid x)dx
+$$
+</div>
+<p>对于离散型随机变量 \(X\)，已知 \(X\) 的 PMF，则 \(Y = g(X)\) 的 PMF 如下。对于连续型随机变量 \(X\)，已知 \(X\) 的 PDF，则 \(Y = g(X)\) 的 PDF 如下。可以使用以下公式证明，正态随机变量的线性函数仍服从正态分布。</p>
+<div>
+$$
+p_{Y}(y) = P(g(X) = y) = \sum_{x: g(x) = y}p_{X}(x)
+$$
+</div>
+<div>
+$$
+F_{Y}(y) = P(Y \leq y),\
+f_{Y}(y) = \frac{dF_{Y}}{dy}(y) \rightarrow
+Y = aX + b,\
+f_{Y}(y) = \frac{1}{|a|}f_{X}(\frac{y - b}{a})
+$$
+</div>
+<h3 id="Lecture-11-Derived-Distributions-Convolution-Covariance-and-Correlation">Lecture 11: Derived Distributions; Convolution; Covariance and Correlation</h3>
+<p>如果 \(Y = g(X)\) 且函数 \(g\) 严格单调递增，则随机变量 \(X\) 和 \(Y\) 的 PMF 满足以下关系。如果 \(W = X + Y\) 且 \(X\) 和 \(Y\) 独立，则有如下卷积公式 \(p_{W}(w)\) 和 \(f_{W}(w)\)，分别对应离散和连续情况。可以使用卷积公式证明，独立的正态随机变量之和仍服从正态分布。</p>
+<div>
+$$
+P(\ x \leq X \leq x + \delta) = P(g(x) \leq Y \leq g(x + \delta) \approx g(x) + \delta|\frac{dg}{dx}(x)|) \rightarrow
+\delta f_{X}(x) = \delta \left|\frac{dg}{dx}(x)\right|f_{Y}(y)
+$$
+</div>
+<div>
+$$
+p_{W}(w) = \sum_{x}P_{X}(x)p_{Y}(w - x),\
+f_{W}(w) = \int_{-\infty}^{\infty}f_{X}(x)f_{Y}(w - x)
+$$
+</div>
+<p><img src="/img/Math.assets/1752026105461.png" alt=""></p>
+<p>协方差大于零说明 \(X\) 和 \(Y\) 成正相关，小于零说明成负相关。如果 \(X\) 和 \(Y\) 独立，则协方差为零，反之不一定成立。类似方差和标准差，为消除单位的影响，提出相关系数 \(\rho\) 的概念，表示变量之间的关联程度。</p>
+<div>
+$$
+\DeclareMathOperator{\cov}{cov}
+\cov(X, Y) = E\left[(X - E[X]) \cdot (Y - E[Y])\right]
+$$
+</div>
+<div>
+$$
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\cov(X, X) = \var(X),\
+\cov(X, Y) = E[XY] - E[X]E[Y],\
+\var\left(\sum_{i = 1}^{n}X_{i}\right) = \sum_{i = 1}^{n}\var(X_{i}) + \sum_{(i, j): i \neq j}\cov(X_{i}, X_{j})
+$$
+</div>
+<div>
+$$
+\DeclareMathOperator{\cov}{cov}
+\rho = \frac{\cov(X, Y)}{\sigma_{X}\sigma_{Y}},\
+-1 \leq \rho \leq 1
+$$
+</div>
+<div>
+$$
+|\rho| = 1 \iff (X - E[X]) = c(Y - E[Y])
+$$
+</div>
+<h3 id="Lecture-12-Iterated-Expectations-Sum-of-a-Random-Number-of-Random-Variables">Lecture 12: Iterated Expectations; Sum of a Random Number of Random Variables</h3>
+<div>
+$$
+\DeclareMathOperator{\var}{var}
+E[E[X \mid Y]] = \sum_{y}E[X \mid Y = y]p_{Y}(y) = E[X],\
+\var(X) = E[\var(X \mid Y)] + \var(E[X \mid Y])
+$$
+</div>
+<div>
+$$
+\DeclareMathOperator{\var}{var}
+Y = \sum_{i = 1}^{N}X_{i},\
+E[Y] = E[E[Y \mid N]] = E[NE[X]] = E[N]E[X],\
+\var(Y) = E[\var(Y \mid N)] + \var(E[Y \mid N]) = E[N]\var(X) + (E[X])^{2}\var(N)
+$$
+</div>
+<h2 id="Unit-IV-Laws-Of-Large-Numbers-And-Inference">Unit IV: Laws Of Large Numbers And Inference</h2>
+</div><div class="article-licensing box"><div class="licensing-title"><p>Introduction to Probability</p><p><a href="https://ligh0x74.github.io/2023/01/01/Introduction to Probability/">https://ligh0x74.github.io/2023/01/01/Introduction to Probability/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Ligh0x74</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2023-01-01</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2025-07-09</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a><a class="icons" rel="noopener" target="_blank" title="ShareAlike" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-sa"></i></a></p></div></div></div></div></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2023/01/01/Calculus/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">Calculus</span></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="waline-thread"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.css"><script src="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.js"></script><script>Waline.init({
             el: '#waline-thread',
             serverURL: "https://blog-waline-ligh0x74.vercel.app",
             path: window.location.pathname,
@@ -237,7 +392,7 @@ $$
             pageview: false,
             comment: false,
             copyright: true,
-        });</script></div></div></div><!--!--><div class="column column-right is-4-tablet is-4-desktop is-4-widescreen  order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#Unit-I-Probability-Models-And-Discrete-Random-Variables"><span class="level-left"><span class="level-item">1</span><span class="level-item">Unit I: Probability Models And Discrete Random Variables</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Lecture-2-Conditioning-and-Bayes’-Rule"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">Lecture 2: Conditioning and Bayes’ Rule</span></span></a></li><li><a class="level is-mobile" href="#Lecture-3-Independence"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">Lecture 3: Independence</span></span></a></li><li><a class="level is-mobile" href="#Lecture-4-Counting"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">Lecture 4: Counting</span></span></a></li><li><a class="level is-mobile" href="#Lecture-5-Discrete-Random-Variables-Probability-Mass-Functions-Expectations"><span class="level-left"><span class="level-item">1.4</span><span class="level-item">Lecture 5: Discrete Random Variables; Probability Mass Functions; Expectations</span></span></a></li><li><a class="level is-mobile" href="#Lecture-6-Discrete-Random-Variable-Examples-Joint-PMFs"><span class="level-left"><span class="level-item">1.5</span><span class="level-item">Lecture 6: Discrete Random Variable Examples; Joint PMFs</span></span></a></li><li><a class="level is-mobile" href="#Lecture-7-Multiple-Discrete-Random-Variables"><span class="level-left"><span class="level-item">1.6</span><span class="level-item">Lecture 7: Multiple Discrete Random Variables</span></span></a></li></ul></li><li><a class="level is-mobile" href="#Unit-II-General-Random-Variables"><span class="level-left"><span class="level-item">2</span><span class="level-item">Unit II: General Random Variables</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Lecture-8-Continuous-Random-Variables"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">Lecture 8: Continuous Random Variables</span></span></a></li><li><a class="level is-mobile" href="#Lecture-9-Multiple-Continuous-Random-Variables"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">Lecture 9: Multiple Continuous Random Variables</span></span></a></li></ul></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2025 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+        });</script></div></div></div><!--!--><div class="column column-right is-4-tablet is-4-desktop is-4-widescreen  order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#"><span class="level-left"><span class="level-item">1</span><span class="level-item">Introduction to Probability</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Unit-I-Probability-Models-And-Discrete-Random-Variables"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">Unit I: Probability Models And Discrete Random Variables</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Lecture-2-Conditioning-and-Bayes’-Rule"><span class="level-left"><span class="level-item">1.1.1</span><span class="level-item">Lecture 2: Conditioning and Bayes’ Rule</span></span></a></li><li><a class="level is-mobile" href="#Lecture-3-Independence"><span class="level-left"><span class="level-item">1.1.2</span><span class="level-item">Lecture 3: Independence</span></span></a></li><li><a class="level is-mobile" href="#Lecture-4-Counting"><span class="level-left"><span class="level-item">1.1.3</span><span class="level-item">Lecture 4: Counting</span></span></a></li><li><a class="level is-mobile" href="#Lecture-5-Discrete-Random-Variables-Probability-Mass-Functions-Expectations"><span class="level-left"><span class="level-item">1.1.4</span><span class="level-item">Lecture 5: Discrete Random Variables; Probability Mass Functions; Expectations</span></span></a></li><li><a class="level is-mobile" href="#Lecture-6-Discrete-Random-Variable-Examples-Joint-PMFs"><span class="level-left"><span class="level-item">1.1.5</span><span class="level-item">Lecture 6: Discrete Random Variable Examples; Joint PMFs</span></span></a></li><li><a class="level is-mobile" href="#Lecture-7-Multiple-Discrete-Random-Variables"><span class="level-left"><span class="level-item">1.1.6</span><span class="level-item">Lecture 7: Multiple Discrete Random Variables</span></span></a></li></ul></li><li><a class="level is-mobile" href="#Unit-II-General-Random-Variables"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">Unit II: General Random Variables</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Lecture-8-Continuous-Random-Variables"><span class="level-left"><span class="level-item">1.2.1</span><span class="level-item">Lecture 8: Continuous Random Variables</span></span></a></li><li><a class="level is-mobile" href="#Lecture-9-Multiple-Continuous-Random-Variables"><span class="level-left"><span class="level-item">1.2.2</span><span class="level-item">Lecture 9: Multiple Continuous Random Variables</span></span></a></li><li><a class="level is-mobile" href="#Lecture-10-Continuous-Bayes’-Rule-Derived-Distributions"><span class="level-left"><span class="level-item">1.2.3</span><span class="level-item">Lecture 10: Continuous Bayes’ Rule; Derived Distributions</span></span></a></li><li><a class="level is-mobile" href="#Lecture-11-Derived-Distributions-Convolution-Covariance-and-Correlation"><span class="level-left"><span class="level-item">1.2.4</span><span class="level-item">Lecture 11: Derived Distributions; Convolution; Covariance and Correlation</span></span></a></li><li><a class="level is-mobile" href="#Lecture-12-Iterated-Expectations-Sum-of-a-Random-Number-of-Random-Variables"><span class="level-left"><span class="level-item">1.2.5</span><span class="level-item">Lecture 12: Iterated Expectations; Sum of a Random Number of Random Variables</span></span></a></li></ul></li><li><a class="level is-mobile" href="#Unit-IV-Laws-Of-Large-Numbers-And-Inference"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">Unit IV: Laws Of Large Numbers And Inference</span></span></a></li></ul></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2025 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
             article: {
                 highlight: {
                     clipboard: true,
