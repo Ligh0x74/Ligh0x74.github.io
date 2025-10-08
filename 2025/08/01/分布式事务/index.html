@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>分布式事务 - Ligh0x74&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Ligh0x74&#039;s Blog"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ligh0x74&#039;s Blog"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="参考 2PC，3PC，Oracle Transaction Manager，Seata Transaction Mode，Seata Blog（重要）。 没有时间细看各个资料和实现，以下内容掺杂个人理解，不保证正确性。 各个方案实际上就是在强一致性和可用性之间做权衡，一般保证可用性会选择最终一致性。 2PC &amp;amp; 3PC &amp;amp; XA &amp;amp; AT 两阶段提交分为准备和提交&amp;#x2F;回滚阶段"><meta property="og:type" content="blog"><meta property="og:title" content="分布式事务"><meta property="og:url" content="https://ligh0x74.github.io/2025/08/01/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/"><meta property="og:site_name" content="Ligh0x74&#039;s Blog"><meta property="og:description" content="参考 2PC，3PC，Oracle Transaction Manager，Seata Transaction Mode，Seata Blog（重要）。 没有时间细看各个资料和实现，以下内容掺杂个人理解，不保证正确性。 各个方案实际上就是在强一致性和可用性之间做权衡，一般保证可用性会选择最终一致性。 2PC &amp;amp; 3PC &amp;amp; XA &amp;amp; AT 两阶段提交分为准备和提交&amp;#x2F;回滚阶段"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://ligh0x74.github.io/img/System.assets/1759891626781.png"><meta property="article:published_time" content="2025-07-31T16:00:00.000Z"><meta property="article:modified_time" content="2025-10-08T09:50:36.901Z"><meta property="article:author" content="Ligh0x74"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://ligh0x74.github.io/img/System.assets/1759891626781.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://ligh0x74.github.io/2025/08/01/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/"},"headline":"分布式事务","image":["https://ligh0x74.github.io/img/System.assets/1759891626781.png"],"datePublished":"2025-07-31T16:00:00.000Z","dateModified":"2025-10-08T09:50:36.901Z","author":{"@type":"Person","name":"Ligh0x74"},"publisher":{"@type":"Organization","name":"Ligh0x74's Blog","logo":{"@type":"ImageObject","url":"https://ligh0x74.github.io/img/logo.svg"}},"description":"参考 2PC，3PC，Oracle Transaction Manager，Seata Transaction Mode，Seata Blog（重要）。 没有时间细看各个资料和实现，以下内容掺杂个人理解，不保证正确性。 各个方案实际上就是在强一致性和可用性之间做权衡，一般保证可用性会选择最终一致性。 2PC &amp; 3PC &amp; XA &amp; AT 两阶段提交分为准备和提交&#x2F;回滚阶段"}</script><link rel="canonical" href="https://ligh0x74.github.io/2025/08/01/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/monokai.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;600&amp;family=Roboto+Mono"><link rel="stylesheet" href="/css/cyberpunk.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/links">Links</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2025-07-31T16:00:00.000Z" title="2025/8/1 00:00:00">2025-08-01</time>发表</span><span class="level-item"><time dateTime="2025-10-08T09:50:36.901Z" title="2025/10/8 17:50:36">2025-10-08</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/">基础</a><span> / </span><a class="link-muted" href="/categories/%E5%9F%BA%E7%A1%80/%E7%B3%BB%E7%BB%9F/">系统</a></span><span class="level-item">18 分钟读完 (大约2631个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">分布式事务</h1><div class="content"><p>参考 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Two-phase_commit_protocol">2PC</a>，<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Three-phase_commit_protocol">3PC</a>，<a target="_blank" rel="noopener" href="https://docs.oracle.com/en/database/oracle/transaction-manager-for-microservices/24.2/tmmdg/distributed-transaction-protocols.html">Oracle Transaction Manager</a>，<a target="_blank" rel="noopener" href="https://seata.apache.org/docs/user/mode/at/">Seata Transaction Mode</a>，<a target="_blank" rel="noopener" href="https://seata.apache.org/blog/">Seata Blog</a>（重要）。</p>
+<p><s>没有时间细看各个资料和实现，以下内容掺杂个人理解，不保证正确性。</s> 各个方案实际上就是在强一致性和可用性之间做权衡，一般保证可用性会选择最终一致性。</p>
+<h2 id="2PC-3PC-XA-AT">2PC &amp; 3PC &amp; XA &amp; AT</h2>
+<p><strong>两阶段提交</strong>分为准备和提交/回滚阶段：① 协调者向参与者发送准备请求，参与者执行操作并持久化状态，然后回复同意/拒绝。如果准备请求超时，由于某个参与者网络分区或崩溃，则协调者会直接决定中止事务。② 协调者根据参与者的回复决定提交/中止事务，只有当所有参与者都回复同意才会决定提交。协调者会将决定持久化，然后发送提交/中止请求。③ 参与者执行提交/回滚，然后回复确认。在协调者收到所有参与者的确认之后，此时可以响应客户端。否则，协调者会一直重试请求，直到参与者确认。</p>
+<p>存在的问题：当参与者回复同意/拒绝之后，必须等待协调者做出决定，才能真正提交/回滚本地事务，期间会一直持有数据库锁。当协调者做出决定之后，必须等待所有参与者执行完成，才能响应客户端。不论是协调者还是参与者崩溃，都会阻塞整个事务。不过，某个参与者崩溃不会阻塞其他参与者的本地事务（要么提交要么回滚），由于有准备请求有超时中止机制。而协调者崩溃会阻塞所有参与者的本地事务。实际上，协调者可以使用共识算法实现容错，避免单点故障。</p>
+<p><strong>三阶段提交</strong>有 CanCommit、PreCommit 和 DoCommit 阶段。CanCommit 阶段只是询问参与者是否可以执行事务，而不会执行操作锁定资源，这样可以提前发现事务无法执行，避免无效的资源锁定。在 PreCommit 阶段，如果参与者回复同意，且在超时时间内没有收到协调器的提交/中止请求，则该参与者会主动提交事务（有不一致的风险）。3PC 不保证强一致性，而且相比 2PC 有额外的网络往返开销。</p>
+<p><strong>XA</strong> 是异构环境下实现 2PC 的工业标准，规定事务协调者和参与者通信的 API，其中异构是指参与者由不同数据库或消息队列组成。Seata 的 <strong>AT</strong> 模式从 2PC 演化而来，在准备阶段本地事务会直接提交，只不过在提交之前需要获取相关记录的全局锁，而且本地事务需要维护回滚日志表。协调器提交事务时，会让参与者异步批量删除回滚日志。回滚时参与者会根据全局和分支事务 ID 找到对应回滚日志，将日志中的后镜像数据和当前数据进行比较，根据配置的策略进行处理。AT 模式因为有全局锁，不存在脏写问题，不过默认的隔离级别是读未提交，因为读取默认不会获取全局锁，个人认为这也是它性能比 2PC 更好的原因（或许还有其他原因）。</p>
+<h2 id="Sega-TCC">Sega &amp; TCC</h2>
+<p>基本概念：应用程序 AP，事务管理器 TM，资源管理器 RM，事务协调者 TC。<strong>Saga</strong> 模式没有 TCC 模式的预留操作，参与者会直接执行本地事务转移资源，存在<a target="_blank" rel="noopener" href="https://seata.apache.org/zh-cn/docs/user/mode/saga/#%E7%BC%BA%E4%B9%8F%E9%9A%94%E7%A6%BB%E6%80%A7%E7%9A%84%E5%BA%94%E5%AF%B9">脏写导致无法回滚</a>的风险。例如转账场景，A 向 B 转账，如果 B 的余额增加之后，A 扣款失败，需要回滚 B 的余额，而 B 已经使用完该余额，则无法完成回滚（或者说无法完成补偿）。</p>
+<p><strong>TCC</strong> 表示 Try-Confirm/Cancel，有尝试阶段和确认/取消阶段。协调者请求参与者预留资源（将资源转移到中间表），如果所有资源都预留成功，则确认所有预留，否则取消所有预留。因为请求超时会重试请求，所以需要保证预留、确认和取消操作的幂等性。该方案依赖业务层实现预留、确认和取消操作，这些操作都是单独的本地事务，不存在长期持有数据库锁的问题。</p>
+<p>操作的幂等性可以通过在数据库中维护分支事务状态表，使用全局事务 ID + 分支事务 ID 去重来实现。分支事务状态表应该存储在本地，因为要保证操作和事务状态更新的原子性，利用本地事务可以做到。不过协调者也要维护全局事务状态表，从而根据事务状态决定执行预留、确认还是取消操作。（或者有其他方案）</p>
+<p>如果协调者请求参与者预留资源超时且重试次数耗尽，则会直接中止事务，取消所有预留的资源。如果没有预留资源的参与者收到取消预留的请求，则不会执行任何操作而是直接返回成功（空回滚）。协调者可以使用共识算法容错，根据全局事务的状态，决定预留资源或者确认/取消分支事务预留的资源。如果参与者在收到取消预留请求之后收到预留资源的请求，则会发生资源悬挂的问题。参与者在预留之前会检查该事务是否发生空回滚，如果发生则拒绝本次预留请求。</p>
+<p><img src="/img/System.assets/1759891626781.png" alt=""></p>
+<h2 id="本地消息表-事务消息">本地消息表 &amp; 事务消息</h2>
+<p>分布式事务的问题在于，事务发起者执行本地事务之后，无法保证其他参与者的本地事务也能够执行成功。以转账为例，A 向 B 转账，A 本地执行扣款之后，向 B 发送转账请求，A 无法保证 B 执行成功，存在不一致的风险。之前的 2PC 方案是通过数据库协调来保证事务的原子性，TCC 方案是通过业务层面的设计保证全局事务的原子性。</p>
+<p>另一种方案就是，事务发起者将待发送的请求存储到<strong>本地消息表</strong>中，和业务操作放在同一个事务中执行。然后使用定时任务定期扫描本地消息表，将待发送的消息发送给消息队列，如果发送成功则从表中删除该消息记录（或者修改状态为已发送）。事务参与者监听消息队列，拉取消息执行本地事务，然后向消息队列回复确认消费。</p>
+<p>由于本地事务具有原子性，事务发起者可以保证业务操作执行成功时，请求消息也被记录到本地消息表。定期扫描会保证消息最终会被发送到消息队列，消息队列可以保证消息至少被消费一次，最后消费者需要再业务层面保证消费的幂等性，例如使用唯一 ID 在数据库层面去重。</p>
+<p>注意，Kafka 保证内部的精确一次消息传递，但涉及到外部数据库就只能保证至少一次。如果需要精确一次，可以利用业务层面的幂等性做去重，也可以使用 2PC。或者利用本地事务的原子性，将日志偏移量和业务数据同时存储到数据库，然后消费者重启时读取偏移量来保证不重复消费（其实就是本地消息表方案）。</p>
+<p>可以使用 RocketMQ 的<strong>事务消息</strong>功能实现类似本地消息表的方案。事务发起者首先向消息队列发送半消息，该消息对消费者不可见。然后发起者执行本地事务（执行业务操作 + 维护事务状态），根据本地事务的执行结果向消息队列发送提交/回滚请求，如果提交则消费者可以消费相应消息。如果发起者长时间未提交/回滚事务消息，消息队列会调用发起者提供的回查接口来查询事务状态。超时回查机制类似本地消息表的定时任务机制，目的都是保证最终一致性。事务消息方案依然需要发起者维护事务状态表，只是不需要自己使用定时任务扫描来重试请求，而是将扫描的工作交给消息队列。</p>
+<p>不论本地消息表还是事务消息方案，如果参与者无法消费消息直到重试次数耗尽，则需要设计额外的回滚机制或者人工干预。而且和 Saga 策略类似，由于不会预留资源，存在脏写导致无法回滚的问题。这需要业务流程上做设计，保证能够通过人工干预完成事务，或者不断重试直到成功。</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>分布式事务</p><p><a href="https://ligh0x74.github.io/2025/08/01/分布式事务/">https://ligh0x74.github.io/2025/08/01/分布式事务/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Ligh0x74</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2025-08-01</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2025-10-08</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a><a class="icons" rel="noopener" target="_blank" title="ShareAlike" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-sa"></i></a></p></div></div></div></div></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2025/09/21/%E5%A4%8D%E7%8E%B0%20Apache%20Shiro%201.2.4%20%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">复现 Apache Shiro 1.2.4 反序列化漏洞</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2025/07/09/%E4%BD%BF%E7%94%A8%20ZooKeeper%20%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"><span class="level-item">使用 ZooKeeper 实现分布式锁</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="waline-thread"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.css"><script src="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.js"></script><script>Waline.init({
+            el: '#waline-thread',
+            serverURL: "https://blog-waline-ligh0x74.vercel.app",
+            path: window.location.pathname,
+            lang: "zh-CN",
+            locale: {"placeholder":"Comment here..."},
+            emoji: ["//unpkg.com/@waline/emojis@1.0.1/weibo"],
+            dark: "auto",
+            meta: ["nick","mail","link"],
+            requiredMeta: [],
+            login: "enable",
+            
+            pageSize: 10,
+            imageUploader: false,
+            
+            texRenderer: false,
+            search: false,
+            pageview: false,
+            comment: false,
+            copyright: true,
+        });</script></div></div></div><!--!--><div class="column column-right is-4-tablet is-4-desktop is-4-widescreen  order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#2PC-3PC-XA-AT"><span class="level-left"><span class="level-item">1</span><span class="level-item">2PC &amp; 3PC &amp; XA &amp; AT</span></span></a></li><li><a class="level is-mobile" href="#Sega-TCC"><span class="level-left"><span class="level-item">2</span><span class="level-item">Sega &amp; TCC</span></span></a></li><li><a class="level is-mobile" href="#本地消息表-事务消息"><span class="level-left"><span class="level-item">3</span><span class="level-item">本地消息表 &amp; 事务消息</span></span></a></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2025 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><script type="text/x-mathjax-config">MathJax.Hub.Config({
+            'HTML-CSS': {
+                matchFontHeight: false
+            },
+            SVG: {
+                matchFontHeight: false
+            },
+            CommonHTML: {
+                matchFontHeight: false
+            },
+            tex2jax: {
+                inlineMath: [
+                    ['$','$'],
+                    ['\\(','\\)']
+                ]
+            }
+        });</script><script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
