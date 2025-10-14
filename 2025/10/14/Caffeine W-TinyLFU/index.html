@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Caffeine W-TinyLFU - Ligh0x74&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Ligh0x74&#039;s Blog"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ligh0x74&#039;s Blog"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="参考 Caffeine GitHub，Design of a Modern Cache，Cache Eviction and Expiration Policy，幻灯片。 计数方式 Count-min Sketch 是一种概率数据结构，底层使用计数器矩阵和多个哈希函数，原理类似布隆过滤器。添加元素会递增每行的计数器，取最小值作为频率的估计值，每行计数器的位置使用哈希函数计算得到。  执行流程 首先"><meta property="og:type" content="blog"><meta property="og:title" content="Caffeine W-TinyLFU"><meta property="og:url" content="https://ligh0x74.github.io/2025/10/14/Caffeine%20W-TinyLFU/"><meta property="og:site_name" content="Ligh0x74&#039;s Blog"><meta property="og:description" content="参考 Caffeine GitHub，Design of a Modern Cache，Cache Eviction and Expiration Policy，幻灯片。 计数方式 Count-min Sketch 是一种概率数据结构，底层使用计数器矩阵和多个哈希函数，原理类似布隆过滤器。添加元素会递增每行的计数器，取最小值作为频率的估计值，每行计数器的位置使用哈希函数计算得到。  执行流程 首先"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://ligh0x74.github.io/img/Java.assets/1760410316759.png"><meta property="og:image" content="https://ligh0x74.github.io/img/Java.assets/1760412898560.png"><meta property="og:image" content="https://ligh0x74.github.io/img/Java.assets/1760417716685.png"><meta property="og:image" content="https://ligh0x74.github.io/img/Java.assets/1760417780512.png"><meta property="og:image" content="https://ligh0x74.github.io/img/Java.assets/1760424803280.png"><meta property="og:image" content="https://ligh0x74.github.io/img/Java.assets/1760427054494.png"><meta property="article:published_time" content="2025-10-14T09:16:58.479Z"><meta property="article:modified_time" content="2025-10-14T09:20:52.590Z"><meta property="article:author" content="Ligh0x74"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="https://ligh0x74.github.io/img/Java.assets/1760410316759.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://ligh0x74.github.io/2025/10/14/Caffeine%20W-TinyLFU/"},"headline":"Caffeine W-TinyLFU","image":["https://ligh0x74.github.io/img/Java.assets/1760410316759.png","https://ligh0x74.github.io/img/Java.assets/1760412898560.png","https://ligh0x74.github.io/img/Java.assets/1760417716685.png","https://ligh0x74.github.io/img/Java.assets/1760417780512.png","https://ligh0x74.github.io/img/Java.assets/1760424803280.png","https://ligh0x74.github.io/img/Java.assets/1760427054494.png"],"datePublished":"2025-10-14T09:16:58.479Z","dateModified":"2025-10-14T09:20:52.590Z","author":{"@type":"Person","name":"Ligh0x74"},"publisher":{"@type":"Organization","name":"Ligh0x74's Blog","logo":{"@type":"ImageObject","url":"https://ligh0x74.github.io/img/logo.svg"}},"description":"参考 Caffeine GitHub，Design of a Modern Cache，Cache Eviction and Expiration Policy，幻灯片。 计数方式 Count-min Sketch 是一种概率数据结构，底层使用计数器矩阵和多个哈希函数，原理类似布隆过滤器。添加元素会递增每行的计数器，取最小值作为频率的估计值，每行计数器的位置使用哈希函数计算得到。  执行流程 首先"}</script><link rel="canonical" href="https://ligh0x74.github.io/2025/10/14/Caffeine%20W-TinyLFU/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/monokai.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;600&amp;family=Roboto+Mono"><link rel="stylesheet" href="/css/cyberpunk.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/links">Links</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2025-10-14T09:16:58.479Z" title="2025/10/14 17:16:58">2025-10-14</time>发表</span><span class="level-item"><time dateTime="2025-10-14T09:20:52.590Z" title="2025/10/14 17:20:52">2025-10-14</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a><span> / </span><a class="link-muted" href="/categories/%E8%AF%AD%E8%A8%80/Java/">Java</a></span><span class="level-item">9 分钟读完 (大约1389个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">Caffeine W-TinyLFU</h1><div class="content"><p>参考 <a target="_blank" rel="noopener" href="https://github.com/ben-manes/caffeine">Caffeine GitHub</a>，<a target="_blank" rel="noopener" href="https://highscalability.com/design-of-a-modern-cache/">Design of a Modern Cache</a>，<a target="_blank" rel="noopener" href="https://highscalability.com/design-of-a-modern-cachepart-deux/">Cache Eviction and Expiration Policy</a>，<a target="_blank" rel="noopener" href="https://docs.google.com/presentation/d/1NlDxyXsUG1qlVHMl4vsUUBQfAJ2c2NsFPNPr2qymIBs">幻灯片</a>。</p>
+<h2 id="计数方式">计数方式</h2>
+<p>Count-min Sketch 是一种概率数据结构，底层使用计数器矩阵和多个哈希函数，原理类似布隆过滤器。添加元素会递增每行的计数器，取最小值作为频率的估计值，每行计数器的位置使用哈希函数计算得到。</p>
+<p><img src="/img/Java.assets/1760410316759.png" alt=""></p>
+<h2 id="执行流程">执行流程</h2>
+<p>首先，新元素会进入 Window Cache，被 LRU 淘汰之后会尝试进入 Main Cache。W-TinyLFU 使用 Count-min Sketch 作为过滤器，被 Window Cache 淘汰的新元素会和 Main Cache 中 Probation 段即将淘汰的元素比较，如果新元素的访问频率更高则可以进入 Main Cache。Main Cache 的淘汰流程类似 Linux Page Cache，如果元素在 Probation 段，再次访问会升级到 Protected 段，长期不访问会降级/淘汰。计数器会定期衰减，以适应访问模式的变化。</p>
+<p><img src="/img/Java.assets/1760412898560.png" alt=""></p>
+<p>Filter 可以有效减少顺序扫描导致的缓存污染，同时 Window Cache 给新元素提供增加频率的机会。较小的准入窗口适合偏向频率的负载，不适合偏向时间的负载。因为在偏向时间的负载中，元素可能还没来得及增加频率就被淘汰。可以使用<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Hill_climbing">爬山法</a>（启发式算法）来选择最佳的窗口大小，当命中率发生较大变化时，就会触发该过程，以适应不同负载。</p>
+<h2 id="过期策略">过期策略</h2>
+<p>Caffeine 根据过期时间是否固定来选择过期删除策略。如果过期时间固定，则使用 LRU 列表维护元素的过期顺序。如果过期时间可变，则使用分层时间轮算法，时间复杂度为 $O(1)$。多个时间轮可以表示不同的时间层级，例如例如天、小时、分钟和秒。单个时间轮是一个双向链表数组，每个链表代表一个粗略的时间跨度（在当前时间层级内）。</p>
+<p><img src="/img/Java.assets/1760417716685.png" alt=""></p>
+<p>当上层时间轮转动时，上层时间轮的下一个桶会被刷新到下层时间轮，这些元素会被重新哈希并放置在相应的位置。例如，一天之后过期的元素在天数层级的时间轮中，一天之后，天数层级的时间轮转动，桶内元素需要以小时为跨度放置到下层时间轮。当最底层时间轮转动时，最底层时间轮的上一个桶中的元素会被逐出，因为元素已经过期。</p>
+<p><img src="/img/Java.assets/1760417780512.png" alt=""></p>
+<h2 id="并发设计">并发设计</h2>
+<p>在大多数缓存淘汰策略中，读操作也会修改共享状态（策略信息），例如 LRU 的移动元素、LFU 的更新计数。为保证更新策略信息的线程安全，使用全局独占锁会有性能问题，使用分段锁也无法避免热点元素导致的性能问题（并发竞争单个锁）。另一种方法是将操作记录到缓冲区，然后异步批量处理，用于更新策略信息（读写哈希表不会阻塞）。</p>
+<blockquote>
+<p>When contention becomes a bottleneck the next classic step has been to update only per entry metadata and use either a random sampling or a FIFO-based eviction policy. Those techniques can have great read performance, poor write performance, and difficulty in choosing a good victim.（没有看懂）</p>
+</blockquote>
+<p>Caffeine 使用缓冲池优化，减少并发更新策略信息的锁竞争导致的性能问题，读写操作使用不同的缓冲区。读操作使用条带化的环形缓冲区，根据线程的哈希值选择条带，而不是元素的哈希值，避免热点元素导致的竞争问题。当检测到竞争时，会自动增加条带。当环形缓冲区已满时，触发异步批量处理（只需获取一次锁），此时会丢弃对该缓冲区的后续添加，直到空间可用。被丢弃的读操作依然会将缓存值返回给调用者，只是不会更新策略信息，部分策略信息的丢失不会对性能产生太大影响。写操作使用单个并发队列，会逐个而不是批量处理，不允许丢失。读写缓冲区都是多生产者单消费者的模式。使用缓冲区会存在线程安全问题，对元素的增删改查操作可能乱序执行，Caffeine 使用状态机定义元素的生命周期来解决该问题。</p>
+<p><img src="/img/Java.assets/1760424803280.png" alt=""></p>
+<p><img src="/img/Java.assets/1760427054494.png" alt=""></p>
+<p>个人理解，缓冲池优化主要是异步批量处理策略信息的更新，避免阻塞读写哈希表，避免频繁获取锁。Caffeine 缓存的元素是可以随时淘汰的，而磁盘页面缓冲池还需要判断页面是否被 Pin。</p>
+<h2 id="源码分析">源码分析</h2>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// TODO</span></span><br></pre></td></tr></table></figure>
+</div><div class="article-licensing box"><div class="licensing-title"><p>Caffeine W-TinyLFU</p><p><a href="https://ligh0x74.github.io/2025/10/14/Caffeine W-TinyLFU/">https://ligh0x74.github.io/2025/10/14/Caffeine W-TinyLFU/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Ligh0x74</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2025-10-14</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2025-10-14</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a><a class="icons" rel="noopener" target="_blank" title="ShareAlike" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"><i class="icon fab fa-creative-commons-sa"></i></a></p></div></div></div></div></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2025/10/13/Linux%20Page%20Cache/"><span class="level-item">Linux Page Cache（草稿）</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="waline-thread"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.css"><script src="https://cdn.jsdelivr.net/npm/@waline/client@2.6.3/dist/waline.js"></script><script>Waline.init({
+            el: '#waline-thread',
+            serverURL: "https://blog-waline-ligh0x74.vercel.app",
+            path: window.location.pathname,
+            lang: "zh-CN",
+            locale: {"placeholder":"Comment here..."},
+            emoji: ["//unpkg.com/@waline/emojis@1.0.1/weibo"],
+            dark: "auto",
+            meta: ["nick","mail","link"],
+            requiredMeta: [],
+            login: "enable",
+            
+            pageSize: 10,
+            imageUploader: false,
+            
+            texRenderer: false,
+            search: false,
+            pageview: false,
+            comment: false,
+            copyright: true,
+        });</script></div></div></div><!--!--><div class="column column-right is-4-tablet is-4-desktop is-4-widescreen  order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#计数方式"><span class="level-left"><span class="level-item">1</span><span class="level-item">计数方式</span></span></a></li><li><a class="level is-mobile" href="#执行流程"><span class="level-left"><span class="level-item">2</span><span class="level-item">执行流程</span></span></a></li><li><a class="level is-mobile" href="#过期策略"><span class="level-left"><span class="level-item">3</span><span class="level-item">过期策略</span></span></a></li><li><a class="level is-mobile" href="#并发设计"><span class="level-left"><span class="level-item">4</span><span class="level-item">并发设计</span></span></a></li><li><a class="level is-mobile" href="#源码分析"><span class="level-left"><span class="level-item">5</span><span class="level-item">源码分析</span></span></a></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="Ligh0x74&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2025 Ligh0x74</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><script type="text/x-mathjax-config">MathJax.Hub.Config({
+            'HTML-CSS': {
+                matchFontHeight: false
+            },
+            SVG: {
+                matchFontHeight: false
+            },
+            CommonHTML: {
+                matchFontHeight: false
+            },
+            tex2jax: {
+                inlineMath: [
+                    ['$','$'],
+                    ['\\(','\\)']
+                ]
+            }
+        });</script><script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
